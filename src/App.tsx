@@ -1,157 +1,221 @@
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle,
-  ArrowRight,
+  Activity,
   BarChart3,
-  CheckCircle2,
-  ClipboardList,
+  Bot,
+  Boxes,
+  CircuitBoard,
+  Code2,
   Database,
+  Factory,
   FileSpreadsheet,
-  FileText,
-  Filter,
   Gauge,
+  GitBranch,
+  Layers3,
   LineChart,
+  Monitor,
+  MousePointer2,
+  PackageCheck,
   PlayCircle,
+  ScanLine,
+  Search,
   Sparkles,
-  Table2,
+  TerminalSquare,
   TimerReset,
+  Wand2,
 } from 'lucide-react';
 
-const lessonFlow = [
-  { time: '5분', label: '지난 시간 연결', detail: '좋은 지시문이 왜 자동화 결과를 바꾸는지 복습' },
-  { time: '8분', label: 'MES 데이터 구조', detail: '라인, 공정, 모델, Lot, 수율, 불량 컬럼 읽는 법' },
-  { time: '15분', label: '실습 1: 요약 자동화', detail: '수만 줄 CSV를 AI에게 맡겨 핵심 표와 차트 만들기' },
-  { time: '12분', label: '실습 2: 하락 원인 찾기', detail: '전일 대비 3% 이상 하락 조건으로 우선순위 도출' },
-  { time: '8분', label: '보고서 앱 만들기', detail: '현장 회의용 HTML 대시보드 구성' },
-  { time: '5분', label: '검증과 과제', detail: 'AI 결과를 엔지니어 기준으로 확인하는 체크리스트' },
-];
+type TermProps = {
+  children: string;
+  note: string;
+};
 
-const learningGoals = [
-  'MES/수율 CSV에서 AI에게 알려줘야 할 컬럼과 기준을 구분한다.',
-  'TCREI 프롬프트를 실제 데이터 자동화 지시문으로 확장한다.',
-  '수율 하락 라인, 공정, 모델을 자동으로 찾아 보고서 초안을 만든다.',
-  'AI가 만든 결과를 현장 기준으로 검증하고 수정 지시를 줄 수 있다.',
-];
-
-const mesColumns = [
-  { name: 'date', meaning: '생산일', example: '2026-05-01' },
-  { name: 'line', meaning: '라인', example: 'A_LINE' },
-  { name: 'process', meaning: '공정', example: 'Photo' },
-  { name: 'model', meaning: '제품 모델', example: 'OLED-17' },
-  { name: 'lot_id', meaning: 'Lot 번호', example: 'L250501-083' },
-  { name: 'input_qty', meaning: '투입 수량', example: '12,000' },
-  { name: 'good_qty', meaning: '양품 수량', example: '10,884' },
-  { name: 'yield', meaning: '수율', example: '90.7%' },
-  { name: 'defect_top1', meaning: '최다 불량', example: 'Particle' },
-];
-
-const rawRows = [
-  ['05-01', 'A', 'Photo', 'OLED-17', '91.8', 'Particle', 'OK'],
-  ['05-01', 'B', 'Photo', 'OLED-17', '94.2', 'Scratch', 'OK'],
-  ['05-01', 'C', 'Etch', 'OLED-14', '93.6', 'Open', 'OK'],
-  ['05-02', 'A', 'Photo', 'OLED-17', '90.9', 'Particle', 'OK'],
-  ['05-02', 'B', 'Photo', 'OLED-17', '93.7', 'Scratch', 'OK'],
-  ['05-02', 'C', 'Etch', 'OLED-14', '92.8', 'Open', 'OK'],
-  ['05-03', 'A', 'Photo', 'OLED-17', '86.4', 'Particle', 'CHECK'],
-  ['05-03', 'B', 'Photo', 'OLED-17', '93.1', 'Scratch', 'OK'],
-  ['05-03', 'C', 'Etch', 'OLED-14', '88.9', 'Open', 'CHECK'],
-];
-
-const summaryCards = [
-  { label: '분석 대상', value: '18,420 rows', icon: Database },
-  { label: '하락 감지', value: '2개 조합', icon: AlertTriangle },
-  { label: '보고서 초안', value: '1 page', icon: FileText },
-  { label: '수작업 절감', value: '4시간 -> 10분', icon: TimerReset },
-];
-
-const yieldDrops = [
-  {
-    rank: 1,
-    target: 'A Line / Photo / OLED-17',
-    yesterday: 90.9,
-    today: 86.4,
-    diff: -4.5,
-    cause: 'Particle 불량 증가, PR dispense pressure 변동 이력 확인 필요',
-  },
-  {
-    rank: 2,
-    target: 'C Line / Etch / OLED-14',
-    yesterday: 92.8,
-    today: 88.9,
-    diff: -3.9,
-    cause: 'Open 불량 증가, Chamber pressure hunting 로그 확인 필요',
-  },
-];
-
-const promptBlocks = [
-  {
-    title: '나쁜 지시',
-    tone: 'bad',
-    text: 'MES 데이터 분석해줘. 수율 떨어진 곳 있으면 알려줘.',
-    result: 'AI가 컬럼 의미와 판정 기준을 되묻거나, 일반론 위주의 답변을 냅니다.',
-  },
-  {
-    title: '3강 실습 지시',
-    tone: 'good',
-    text: `역할: 당신은 디스플레이 수율 데이터 분석을 돕는 공정 엔지니어입니다.
-작업: 업로드한 MES CSV에서 line/process/model별 일별 수율을 계산하고, 전일 대비 3%p 이상 하락한 조합을 찾아주세요.
-맥락: 아침 생산 회의에서 10분 안에 우선 확인 대상을 정해야 합니다.
-입력: date, line, process, model, lot_id, input_qty, good_qty, defect_top1 컬럼이 있습니다. yield는 good_qty/input_qty*100으로 계산하세요.
-결과: 1) 하락 TOP 표 2) 7일 수율 추세 3) 원인 후보 3개 4) 엔지니어 확인 질문을 HTML 대시보드 형태로 만들어주세요.`,
-    result: 'AI가 계산 기준, 필터 조건, 산출물 형식을 바로 이해하고 실행 가능한 코드와 보고서를 만듭니다.',
-  },
-];
-
-const practiceSteps = [
-  {
-    icon: FileSpreadsheet,
-    title: 'CSV를 업무 언어로 설명',
-    body: '컬럼명을 붙여넣는 데서 끝내지 말고, 각 컬럼이 현장에서 무엇을 뜻하는지 AI에게 알려줍니다.',
-  },
-  {
-    icon: Filter,
-    title: '판정 기준을 숫자로 고정',
-    body: '“수율이 나쁜 곳” 대신 “전일 대비 3%p 이상 하락”처럼 조건을 명시합니다.',
-  },
-  {
-    icon: BarChart3,
-    title: '회의에서 볼 결과물 지정',
-    body: '표, 추세선, 원인 후보, 확인 질문을 한 화면에 배치하라고 지시합니다.',
-  },
-  {
-    icon: CheckCircle2,
-    title: 'AI 결과를 검증',
-    body: '집계 단위, 결측치 처리, Lot 중복, 수율 계산식을 사람이 다시 확인합니다.',
-  },
-];
-
-const reportChecklist = [
-  '수율 계산식이 good_qty/input_qty*100인지 확인',
-  '라인/공정/모델 단위가 실제 회의 단위와 같은지 확인',
-  '전일 대비 기준이 %인지 %p인지 명확히 확인',
-  '결측치, 재작업 Lot, 중복 Lot 처리 규칙 확인',
-  'AI가 제안한 원인 후보를 설비 이력, 레시피 변경, 자재 Lot와 대조',
-];
-
-function MiniTrend() {
-  const values = [91.8, 90.9, 86.4, 88.1, 89.7, 91.2, 92.0];
-  const min = 85;
-  const max = 95;
-
+function Term({ children, note }: TermProps) {
   return (
-    <div className="trend-chart" aria-label="A Line Photo OLED-17 yield trend">
-      {values.map((value, index) => (
-        <div className="trend-column" key={`${value}-${index}`}>
+    <span className="term" data-note={note}>
+      {children}
+    </span>
+  );
+}
+
+const lessonFlow = [
+  { time: '5분', label: '문제 제시', detail: '엑셀로 CVD 두께 데이터를 확인하는 기존 업무의 한계를 보여줍니다.' },
+  { time: '8분', label: 'CVD 공정 이해', detail: '증착 공정 흐름과 MES에 쌓이는 주요 공정 데이터를 연결합니다.' },
+  { time: '8분', label: '데이터셋 만들기', detail: '수 micrometer 단위의 증착 두께 120개 샘플을 생성하고 컬럼 의미를 설명합니다.' },
+  { time: '10분', label: 'IDE 선택', detail: 'Cursor, Antigravity 같은 AI IDE가 엑셀 자동화와 어떻게 다른지 비교합니다.' },
+  { time: '12분', label: 'Antigravity 실습', detail: '설치, 화면 구조, 메뉴 사용법, 프롬프트 입력 흐름을 단계별로 안내합니다.' },
+  { time: '10분', label: '대시보드 완성', detail: '엑셀에서 보기 어려운 히트맵, 분포, 이상 패턴, 공정 단계별 상관 시각화를 만듭니다.' },
+];
+
+const goals = [
+  'MES 공정관리 데이터가 어떤 의미의 업무 기록인지 설명한다.',
+  'CVD 증착 공정의 시간 흐름과 측정 데이터를 연결한다.',
+  '엑셀 수작업의 한계를 바이브 코딩 과제로 바꾼다.',
+  'Antigravity에서 데이터 요약 대시보드를 만들도록 AI에게 지시한다.',
+  '엑셀 표/차트 수준을 넘어서는 시각화 아이디어를 구현한다.',
+];
+
+const processTerms = [
+  { term: 'MES', note: 'Manufacturing Execution System. 생산 현장의 Lot, 장비, 공정 조건, 검사 결과를 시간순으로 기록하는 실행 관리 시스템입니다.' },
+  { term: 'Lot', note: '동일 조건으로 함께 처리되는 웨이퍼나 패널 묶음입니다. 분석할 때 추적 단위가 됩니다.' },
+  { term: 'Recipe', note: '온도, 압력, 가스 유량, 시간처럼 설비가 따라야 하는 공정 조건 묶음입니다.' },
+  { term: 'CVD', note: 'Chemical Vapor Deposition. 반응 가스를 기판 표면에서 화학 반응시켜 박막을 형성하는 증착 공정입니다.' },
+  { term: 'Deposition Thickness', note: '증착된 박막의 두께입니다. 여기서는 micrometer 단위로 측정합니다.' },
+  { term: 'Uniformity', note: '한 웨이퍼나 패널 안에서 두께가 얼마나 균일한지 나타내는 지표입니다.' },
+  { term: 'Spec Limit', note: '공정이 허용하는 상한/하한 기준입니다. 기준 밖 데이터는 공정 이상 후보가 됩니다.' },
+  { term: 'SPC', note: 'Statistical Process Control. 관리도와 통계 기준으로 공정 상태를 감시하는 방식입니다.' },
+];
+
+const cvdSteps = [
+  { label: 'Load', title: '기판 투입', detail: '웨이퍼 또는 글래스 기판을 챔버에 넣고 공정 대상 Lot을 MES에 연결합니다.' },
+  { label: 'Pump Down', title: '진공 형성', detail: '챔버 내부 압력을 낮춰 반응 환경을 안정화합니다.' },
+  { label: 'Heat', title: '온도 안정화', detail: '기판 온도를 Recipe 목표값까지 올리고 안정 시간을 확보합니다.' },
+  { label: 'Gas Flow', title: '반응 가스 주입', detail: 'SiH4, NH3, N2O 같은 반응 가스와 캐리어 가스를 정해진 유량으로 주입합니다.' },
+  { label: 'Deposition', title: '박막 증착', detail: '기판 표면에서 화학 반응이 일어나 박막 두께가 시간에 따라 증가합니다.' },
+  { label: 'Purge', title: '잔류 가스 제거', detail: '불필요한 반응 가스를 배출하고 챔버를 다음 공정 상태로 전환합니다.' },
+  { label: 'Measure', title: '두께 측정', detail: '계측 장비에서 위치별 두께를 측정하고 MES 또는 품질 DB에 저장합니다.' },
+];
+
+const thicknessData = Array.from({ length: 120 }, (_, index) => {
+  const zone = ['Center', 'Middle', 'Edge'][index % 3];
+  const chamber = ['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'][index % 4];
+  const lotNo = Math.floor(index / 10) + 1;
+  const drift = index > 72 && chamber === 'CVD-03' ? 0.24 : 0;
+  const edgeBias = zone === 'Edge' ? -0.11 : zone === 'Center' ? 0.06 : 0;
+  const wave = Math.sin(index * 0.47) * 0.08 + Math.cos(index * 0.19) * 0.05;
+  const thickness = 2.52 + drift + edgeBias + wave;
+  return {
+    id: index + 1,
+    lot: `CVD-L${String(lotNo).padStart(2, '0')}`,
+    chamber,
+    zone,
+    time: `T+${String(index * 3).padStart(3, '0')}m`,
+    thickness: Number(thickness.toFixed(3)),
+  };
+});
+
+const datasetPreview = thicknessData.slice(0, 14);
+const avgThickness = thicknessData.reduce((sum, row) => sum + row.thickness, 0) / thicknessData.length;
+const maxThickness = Math.max(...thicknessData.map((row) => row.thickness));
+const minThickness = Math.min(...thicknessData.map((row) => row.thickness));
+const outliers = thicknessData.filter((row) => row.thickness < 2.35 || row.thickness > 2.75);
+
+const ideCards = [
+  {
+    name: 'Cursor',
+    icon: Code2,
+    best: '코드 파일을 직접 수정하며 AI와 짝 프로그래밍하기 좋습니다.',
+    use: '이미 프로젝트 구조가 있고, 컴포넌트나 함수 단위로 빠르게 고칠 때 적합합니다.',
+  },
+  {
+    name: 'Antigravity',
+    icon: Bot,
+    best: '작업 목표를 주면 여러 파일을 탐색하고 계획, 구현, 검증까지 이어가는 에이전트형 IDE입니다.',
+    use: '이번 강의처럼 데이터셋, 화면, 분석 로직, 대시보드를 한 번에 만들 때 사용합니다.',
+  },
+  {
+    name: 'VS Code + Copilot',
+    icon: GitBranch,
+    best: '기존 개발 환경에 AI 자동완성을 붙이는 방식입니다.',
+    use: '팀 표준 개발 환경을 유지하면서 반복 코드 작성 속도를 높일 때 적합합니다.',
+  },
+];
+
+const antigravitySteps = [
+  { target: 'download', title: '설치 파일 받기', body: '공식 배포 페이지에서 운영체제에 맞는 설치 파일을 내려받고 실행합니다.', x: 18, y: 18 },
+  { target: 'explorer', title: '프로젝트 폴더 열기', body: '좌측 Explorer에서 lecture03 폴더를 열어 src, public, package.json 구조를 확인합니다.', x: 14, y: 44 },
+  { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 지시합니다.', x: 78, y: 26 },
+  { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다.', x: 46, y: 84 },
+  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명이 충분한지 확인하고 수정시킵니다.', x: 55, y: 48 },
+];
+
+const excelPain = [
+  '120개 샘플을 Lot, 장비, Zone별로 필터링하며 평균과 편차를 반복 계산',
+  'Spec 2.35-2.75 micrometer 밖의 데이터를 조건부 서식으로 찾음',
+  'CVD-03의 후반부 drift처럼 시간 순서 패턴을 눈으로 추적',
+  'Center/Middle/Edge 위치별 차이를 피벗 테이블과 여러 차트로 따로 확인',
+  '보고서용 캡처를 만들 때마다 필터 상태가 바뀌어 재현성이 떨어짐',
+];
+
+const dashboardInsights = [
+  { label: '평균 두께', value: `${avgThickness.toFixed(3)} micrometer`, icon: Gauge },
+  { label: '범위', value: `${minThickness.toFixed(3)} - ${maxThickness.toFixed(3)}`, icon: ScanLine },
+  { label: 'Spec 이탈', value: `${outliers.length} points`, icon: Activity },
+  { label: '의심 패턴', value: 'CVD-03 late drift', icon: Sparkles },
+];
+
+const promptText = `역할: 당신은 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
+입력: 120개 이상의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, chamber, zone, time, thickness입니다.
+작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) zone별 uniformity 4) 시간 흐름에 따른 이상 패턴을 시각화하세요.
+시각화: Excel 기본 차트로 보기 어려운 wafer-zone heat strip, chamber drift map, spec band timeline, anomaly ribbon을 포함하세요.
+결과: 강의용 React 대시보드로 만들고 MES, Lot, Recipe, Uniformity 같은 용어에는 주석형 설명을 붙이세요.`;
+
+function CvdAnimation() {
+  return (
+    <div className="cvd-animation">
+      <div className="chamber">
+        <div className="wafer" />
+        <motion.div
+          className="gas gas-a"
+          animate={{ y: [0, 112], opacity: [0, 1, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="gas gas-b"
+          animate={{ y: [0, 104], opacity: [0, 1, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, delay: 0.35, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="film"
+          animate={{ height: [4, 22, 4] }}
+          transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+      <div className="cvd-steps">
+        {cvdSteps.map((step, index) => (
           <motion.div
-            className={value < 88 ? 'trend-bar alert' : 'trend-bar'}
-            initial={{ height: 0 }}
-            whileInView={{ height: `${((value - min) / (max - min)) * 100}%` }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: index * 0.05 }}
+            className="cvd-step"
+            key={step.label}
+            animate={{ opacity: [0.45, 1, 0.45], scale: [1, 1.04, 1] }}
+            transition={{ duration: 4.9, repeat: Infinity, delay: index * 0.7 }}
+          >
+            <span>{step.label}</span>
+            <strong>{step.title}</strong>
+            <p>{step.detail}</p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ThicknessHeatStrip() {
+  return (
+    <div className="heat-strip">
+      {thicknessData.map((row) => {
+        const hot = (row.thickness - minThickness) / (maxThickness - minThickness);
+        return (
+          <span
+            key={row.id}
+            title={`${row.lot} ${row.chamber} ${row.zone}: ${row.thickness} micrometer`}
+            style={{ backgroundColor: `rgb(${60 + hot * 180}, ${170 - hot * 80}, ${120 - hot * 70})` }}
           />
-          <span>{value.toFixed(1)}</span>
-        </div>
-      ))}
+        );
+      })}
+    </div>
+  );
+}
+
+function SpecTimeline() {
+  return (
+    <div className="spec-timeline">
+      {thicknessData.slice(0, 72).map((row) => {
+        const top = 100 - ((row.thickness - 2.25) / 0.65) * 100;
+        const isOut = row.thickness < 2.35 || row.thickness > 2.75;
+        return <i key={row.id} className={isOut ? 'point out' : 'point'} style={{ top: `${top}%` }} />;
+      })}
+      <b className="spec upper">USL 2.75</b>
+      <b className="spec lower">LSL 2.35</b>
     </div>
   );
 }
@@ -170,30 +234,29 @@ export default function App() {
         </div>
 
         <motion.div className="hero-section" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
-          <span className="hero-kicker">Lecture 03 · 데이터 자동화</span>
+          <span className="hero-kicker">Lecture 03 · MES Dashboard Automation</span>
           <h1>
             바이브 코딩 3강:<br />
-            <mark>엑셀 노가다 탈출</mark>, MES 데이터 요약 웹앱 만들기
+            <mark>엑셀 노가다 탈출</mark>과 CVD 공정 데이터 대시보드
           </h1>
           <p className="subtitle">
-            2강에서 배운 프롬프트 설계를 실제 생산 데이터 자동화로 연결합니다. 수만 줄 CSV를 읽고, 수율 하락 지점을 찾고,
-            회의용 대시보드 초안까지 만드는 실전 강의입니다.
+            <Term note="생산 현장의 공정 실행 데이터를 시간순으로 남기는 시스템입니다.">MES</Term> 공정관리 데이터를 읽고,
+            CVD 증착 두께 데이터셋을 만든 뒤, Antigravity로 요약·분석·고급 시각화 대시보드를 완성하는 전 과정을 단계적으로 설명합니다.
           </p>
           <div className="lesson-meta">
             <span>40-60분 강의</span>
-            <span>실습 중심</span>
-            <span>MES · CSV · 수율 분석</span>
+            <span>CVD 증착 공정</span>
+            <span>Antigravity 실습</span>
+            <span>Excel beyond visualization</span>
           </div>
         </motion.div>
       </header>
 
       <section>
-        <span className="section-label">00. 오늘의 위치</span>
-        <h2>
-          <PlayCircle size={24} /> 말 잘하는 법에서 <mark>일을 맡기는 법</mark>으로 넘어갑니다
-        </h2>
+        <span className="section-label">00. 강의 목표</span>
+        <h2><PlayCircle size={24} /> 엑셀 표 정리에서 <mark>공정 데이터 앱 제작</mark>으로 넘어갑니다</h2>
         <div className="goal-grid">
-          {learningGoals.map((goal, index) => (
+          {goals.map((goal, index) => (
             <motion.div className="goal-card" key={goal} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <p>{goal}</p>
@@ -203,10 +266,8 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">01. 강의 운영안</span>
-        <h2>
-          <ClipboardList size={24} /> 50분 기준 <mark>현장 실습 흐름</mark>
-        </h2>
+        <span className="section-label">01. 50분 운영안</span>
+        <h2><TimerReset size={24} /> 전 과정을 <mark>작은 단계</mark>로 쪼개서 진행합니다</h2>
         <div className="timeline">
           {lessonFlow.map((item) => (
             <div className="timeline-item" key={item.label}>
@@ -221,78 +282,163 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">02. 실무 문제</span>
-        <h2>
-          <FileSpreadsheet size={24} /> 반복되는 Excel 업무를 <mark>AI 작업지시서</mark>로 바꿉니다
-        </h2>
+        <span className="section-label">02. 용어 주석</span>
+        <h2><Factory size={24} /> MES와 주요 공정 용어를 <mark>먼저 고정</mark>합니다</h2>
         <p className="section-intro">
-          강의 상황은 아침 생산 회의 전입니다. 엔지니어는 여러 라인의 MES 파일을 열어 수율이 급락한 조합을 찾아야 합니다.
-          오늘의 목표는 이 반복 업무를 AI에게 맡길 수 있는 형태로 쪼개는 것입니다.
+          화면 안의 물결 밑줄 용어에 마우스를 올리면 설명이 나타납니다. AI에게도 이 수준으로 용어 의미를 알려줘야 엉뚱한 분석을 줄일 수 있습니다.
         </p>
+        <div className="term-grid">
+          {processTerms.map((item) => (
+            <div className="term-card" key={item.term}>
+              <strong><Term note={item.note}>{item.term}</Term></strong>
+              <p>{item.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <span className="section-label">03. CVD 공정</span>
+        <h2><Layers3 size={24} /> CVD 증착은 <mark>시간 흐름</mark>에 따라 데이터가 쌓입니다</h2>
+        <p className="section-intro">
+          <Term note="Chemical Vapor Deposition. 화학 반응으로 표면에 박막을 쌓는 증착 공정입니다.">CVD</Term>는 기판 투입부터 진공,
+          가열, 가스 주입, 증착, purge, 측정으로 이어집니다. 이때 <Term note="설비 조건 묶음. 온도, 압력, 가스 유량, 시간 등을 포함합니다.">Recipe</Term>,
+          챔버, 시간, 측정 두께가 모두 데이터가 됩니다.
+        </p>
+        <CvdAnimation />
+      </section>
+
+      <section>
+        <span className="section-label">04. 두께 데이터셋</span>
+        <h2><Database size={24} /> 120개 CVD 증착 두께 샘플을 <mark>micrometer 단위</mark>로 만듭니다</h2>
+        <p className="section-intro">
+          목표 두께는 약 2.50 micrometer, 관리 기준은 2.35-2.75 micrometer로 가정합니다. 데이터는 Lot, Chamber, Zone, Time, Thickness로 구성됩니다.
+        </p>
+        <div className="dataset-panel">
+          <div className="column-table">
+            {datasetPreview.map((row) => (
+              <div className="column-row dataset-row" key={row.id}>
+                <code>{row.lot}</code>
+                <span>{row.chamber}</span>
+                <span>{row.zone}</span>
+                <span>{row.time}</span>
+                <strong>{row.thickness.toFixed(3)} micrometer</strong>
+              </div>
+            ))}
+          </div>
+          <p className="small-note">화면에는 일부만 표시하지만, 앱 내부 데이터셋은 120개 샘플로 구성되어 있습니다.</p>
+        </div>
+      </section>
+
+      <section>
+        <span className="section-label">05. 엑셀 노가다</span>
+        <h2><FileSpreadsheet size={24} /> 같은 데이터를 엑셀로만 보면 <mark>패턴을 놓치기 쉽습니다</mark></h2>
         <div className="case-grid">
           <div className="work-card manual">
             <span>기존 방식</span>
-            <h3>파일 열기, 필터, 피벗, 캡처를 반복</h3>
+            <h3>필터와 피벗을 계속 바꾸는 무모한 반복</h3>
             <ul>
-              <li>라인별 Excel 파일을 하나씩 열기</li>
-              <li>날짜, 공정, 모델 필터를 매번 적용</li>
-              <li>전일 대비 하락 폭을 눈으로 비교</li>
-              <li>이상 구간을 캡처해 보고서에 붙이기</li>
+              {excelPain.map((item) => <li key={item}>{item}</li>)}
             </ul>
           </div>
-          <div className="work-card ai">
-            <span>바이브 코딩 방식</span>
-            <h3>CSV와 기준을 주고 보고서 앱을 생성</h3>
-            <ul>
-              <li>컬럼 의미와 수율 계산식을 설명</li>
-              <li>전일 대비 3%p 하락 조건을 명시</li>
-              <li>AI에게 표, 차트, 원인 후보를 생성하게 함</li>
-              <li>엔지니어가 검증 후 수정 지시</li>
-            </ul>
+          <div className="excel-window">
+            <div className="excel-toolbar"><span /><span /><span /><b>Excel_CVD_thickness.xlsx</b></div>
+            <div className="excel-grid">
+              {thicknessData.slice(0, 48).map((row) => (
+                <i key={row.id} className={row.thickness > 2.75 || row.thickness < 2.35 ? 'bad' : ''}>{row.thickness.toFixed(2)}</i>
+              ))}
+            </div>
+            <motion.div className="excel-cursor" animate={{ x: [0, 180, 70, 260], y: [0, 55, 150, 190] }} transition={{ duration: 5, repeat: Infinity }} />
           </div>
         </div>
       </section>
 
       <section>
-        <span className="section-label">03. 데이터 읽기</span>
-        <h2>
-          <Table2 size={24} /> AI가 헷갈리지 않도록 <mark>컬럼 사전</mark>을 먼저 줍니다
-        </h2>
-        <div className="column-table">
-          {mesColumns.map((column) => (
-            <div className="column-row" key={column.name}>
-              <code>{column.name}</code>
-              <strong>{column.meaning}</strong>
-              <span>{column.example}</span>
+        <span className="section-label">06. AI IDE 선택</span>
+        <h2><Monitor size={24} /> 바이브 코딩은 <mark>AI IDE</mark>에서 일이 됩니다</h2>
+        <div className="ide-grid">
+          {ideCards.map((ide) => (
+            <div className="ide-card" key={ide.name}>
+              <ide.icon size={26} />
+              <h3>{ide.name}</h3>
+              <p>{ide.best}</p>
+              <b>{ide.use}</b>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <span className="section-label">04. 프롬프트 실습</span>
-        <h2>
-          <Sparkles size={24} /> 2강의 TCREI를 <mark>MES 분석 지시문</mark>으로 확장합니다
-        </h2>
-        <div className="prompt-compare-grid">
-          {promptBlocks.map((block) => (
-            <div className={`prompt-card ${block.tone === 'good' ? 'engineering' : 'general'}`} key={block.title}>
-              <span>{block.title}</span>
-              <div className="prompt-box">{block.text}</div>
-              <p className="prompt-result">{block.result}</p>
-            </div>
-          ))}
+        <span className="section-label">07. Antigravity 사용법</span>
+        <h2><Bot size={24} /> 설치부터 메뉴 사용까지 <mark>화면을 따라갑니다</mark></h2>
+        <p className="section-intro">
+          이번 강의는 Antigravity를 기준으로 진행합니다. 핵심은 “데이터와 목표를 설명하고, AI가 파일을 만들고, 내가 화면을 보고 다시 지시하는” 반복입니다.
+        </p>
+        <div className="tutorial-board">
+          <div className="mock-ide">
+            <aside>
+              <b>Explorer</b>
+              <span>lecture03</span>
+              <span>src/App.tsx</span>
+              <span>src/index.css</span>
+              <span>package.json</span>
+            </aside>
+            <main>
+              <div className="tabs"><span>App.tsx</span><span>Preview</span><span>Dashboard</span></div>
+              <div className="preview-box">
+                <PackageCheck size={34} />
+                <strong>CVD Thickness Dashboard</strong>
+                <p>MES data summary · spec timeline · anomaly ribbon</p>
+              </div>
+              <div className="terminal"><TerminalSquare size={16} /> npm run dev</div>
+            </main>
+            <section className="agent-panel">
+              <b>Agent</b>
+              <p>데이터셋을 읽고 CVD 두께 대시보드를 만들어줘.</p>
+              <button><Wand2 size={15} /> Run</button>
+            </section>
+            {antigravitySteps.map((step, index) => (
+              <motion.div
+                className="pointer-callout"
+                key={step.target}
+                style={{ left: `${step.x}%`, top: `${step.y}%` }}
+                animate={{ opacity: [0, 1, 1, 0], scale: [0.92, 1, 1, 0.92] }}
+                transition={{ duration: 10, repeat: Infinity, delay: index * 1.7 }}
+              >
+                <MousePointer2 size={18} />
+                <span>{index + 1}</span>
+              </motion.div>
+            ))}
+          </div>
+          <div className="tutorial-steps">
+            {antigravitySteps.map((step, index) => (
+              <div className="tutorial-step" key={step.title}>
+                <strong>{index + 1}</strong>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section>
-        <span className="section-label">05. 자동 분석 결과</span>
-        <h2>
-          <Gauge size={24} /> AI가 만들어야 할 결과물을 <mark>눈으로 확인</mark>합니다
-        </h2>
+        <span className="section-label">08. 바이브 코딩 지시문</span>
+        <h2><Sparkles size={24} /> 데이터셋을 <mark>대시보드 요구사항</mark>으로 바꿉니다</h2>
+        <div className="prompt-card engineering wide">
+          <span>Antigravity Agent Prompt</span>
+          <div className="prompt-box">{promptText}</div>
+        </div>
+      </section>
+
+      <section>
+        <span className="section-label">09. 완성 대시보드</span>
+        <h2><BarChart3 size={24} /> 엑셀 기본 차트를 넘어서는 <mark>공정 시각화</mark></h2>
         <div className="dashboard">
           <div className="summary-grid">
-            {summaryCards.map((card) => (
+            {dashboardInsights.map((card) => (
               <div className="summary-card" key={card.label}>
                 <card.icon size={20} />
                 <span>{card.label}</span>
@@ -300,91 +446,45 @@ export default function App() {
               </div>
             ))}
           </div>
-
-          <div className="dashboard-main">
-            <div className="data-panel">
-              <h3>원본 데이터 미리보기</h3>
-              <div className="mini-table">
-                <div className="mini-head">
-                  <span>Date</span>
-                  <span>Line</span>
-                  <span>Proc</span>
-                  <span>Model</span>
-                  <span>Yield</span>
-                  <span>Top Defect</span>
-                  <span>Judge</span>
-                </div>
-                {rawRows.map((row) => (
-                  <div className={row[6] === 'CHECK' ? 'mini-row flagged' : 'mini-row'} key={row.join('-')}>
-                    {row.map((cell) => (
-                      <span key={cell}>{cell}</span>
-                    ))}
+          <div className="viz-grid">
+            <div className="viz-card large">
+              <h3><LineChart size={18} /> Spec band timeline</h3>
+              <SpecTimeline />
+              <p>관리 상한/하한을 배경 밴드로 두고 시간순 두께 변화를 한눈에 봅니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><Boxes size={18} /> Wafer-zone heat strip</h3>
+              <ThicknessHeatStrip />
+              <p>120개 측정값을 위치/시간 순서의 열 지도로 압축합니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><CircuitBoard size={18} /> Chamber drift map</h3>
+              <div className="drift-map">
+                {['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'].map((tool) => (
+                  <div key={tool}>
+                    <span>{tool}</span>
+                    <motion.i initial={{ width: 0 }} whileInView={{ width: tool === 'CVD-03' ? '92%' : '46%' }} viewport={{ once: true }} />
                   </div>
                 ))}
               </div>
+              <p>CVD-03 후반부에서 두께가 위로 밀리는 drift 후보를 강조합니다.</p>
             </div>
-            <div className="chart-panel">
-              <h3>A Line / Photo / OLED-17 7일 수율</h3>
-              <MiniTrend />
-              <p>05-03에 수율 86.4%로 전일 대비 4.5%p 하락했습니다.</p>
-            </div>
-          </div>
-
-          <div className="drop-list">
-            {yieldDrops.map((drop) => (
-              <div className="drop-card" key={drop.rank}>
-                <span>#{drop.rank}</span>
-                <h3>{drop.target}</h3>
-                <div className="drop-metric">
-                  <strong>{drop.yesterday}%</strong>
-                  <ArrowRight size={18} />
-                  <strong>{drop.today}%</strong>
-                  <b>{drop.diff}%p</b>
-                </div>
-                <p>{drop.cause}</p>
+            <div className="viz-card">
+              <h3><Search size={18} /> Anomaly ribbon</h3>
+              <div className="ribbon">
+                {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.chamber === 'CVD-03' ? 'hot' : ''} />)}
               </div>
-            ))}
+              <p>조건부 서식보다 작은 공간에서 이상 구간의 연속성을 보여줍니다.</p>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section>
-        <span className="section-label">06. 강사용 진행 멘트</span>
-        <h2>
-          <LineChart size={24} /> 수강생이 따라 할 <mark>실습 순서</mark>
-        </h2>
-        <div className="practice-grid">
-          {practiceSteps.map((step, index) => (
-            <div className="practice-card" key={step.title}>
-              <step.icon size={24} />
-              <span>Step {index + 1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <span className="section-label">07. 검증 체크리스트</span>
-        <h2>
-          <CheckCircle2 size={24} /> AI 결과는 <mark>현장 기준</mark>으로 다시 확인합니다
-        </h2>
-        <div className="checklist">
-          {reportChecklist.map((item) => (
-            <div className="check-row" key={item}>
-              <CheckCircle2 size={18} />
-              <span>{item}</span>
-            </div>
-          ))}
         </div>
       </section>
 
       <footer className="philosophy-section">
         <h2>3강의 결론</h2>
         <p>
-          바이브 코딩은 “AI에게 분석해줘”라고 말하는 기술이 아닙니다. 현장 문제, 데이터 구조, 판정 기준, 보고서 형식을
-          엔지니어가 정의하고 AI에게 반복 업무를 맡기는 실무 자동화 방식입니다.
+          엑셀을 버리는 것이 목표가 아닙니다. 엑셀이 잘하는 표 확인은 유지하되, 반복 집계와 패턴 발견, 설명 가능한 대시보드 제작은
+          바이브 코딩으로 자동화하는 것이 이번 강의의 핵심입니다.
         </p>
       </footer>
     </div>
