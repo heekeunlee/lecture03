@@ -38,6 +38,15 @@ function Term({ children, note }: TermProps) {
   );
 }
 
+function VizExplain({ children }: { children: string }) {
+  return (
+    <div className="viz-explain">
+      <strong>쉬운 해설</strong>
+      <p>{children}</p>
+    </div>
+  );
+}
+
 const lessonFlow = [
   { time: '5분', label: '문제 제시', detail: '엑셀로 CVD 두께 데이터를 확인하는 기존 업무의 한계를 보여줍니다.' },
   { time: '8분', label: 'CVD 공정 이해', detail: '증착 공정 흐름과 MES에 쌓이는 주요 공정 데이터를 연결합니다.' },
@@ -863,11 +872,17 @@ export default function App() {
               <h3><LineChart size={18} /> Spec band timeline</h3>
               <SpecTimeline />
               <p>관리 상한/하한을 배경 밴드로 두고 시간순 두께 변화를 한눈에 봅니다.</p>
+              <VizExplain>
+                제품마다 허용되는 두께 범위가 있습니다. 점들이 위아래 기준선 안에 모여 있으면 공정이 안정적이고, 선 밖으로 튀면 불량 후보입니다. 시간 뒤쪽으로 갈수록 점들이 한 방향으로 밀리면 장비 상태가 서서히 변하고 있다는 신호입니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Boxes size={18} /> Wafer-zone heat strip</h3>
               <ThicknessHeatStrip />
               <p>120개 측정값을 위치/시간 순서의 열 지도로 압축합니다.</p>
+              <VizExplain>
+                표의 숫자를 색으로 바꾼 그림입니다. 차가운 색은 얇은 막, 따뜻한 색은 두꺼운 막을 뜻합니다. 같은 색이 고르게 반복되면 안정적이고, 특정 구간만 색이 진해지면 그 시간대나 위치에서 두께가 달라졌다는 뜻입니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><CircuitBoard size={18} /> Chamber drift map</h3>
@@ -881,6 +896,9 @@ export default function App() {
                 ))}
               </div>
               <p>CVD-03 후반부에서 두께가 위로 밀리는 drift 후보를 강조합니다.</p>
+              <VizExplain>
+                챔버는 웨이퍼를 처리하는 공정 장비 공간입니다. 막대가 길수록 초반과 후반의 두께 차이가 크다는 뜻입니다. 특정 챔버만 값이 커지면 그 장비의 압력, 가스 유량, 온도 안정화 상태를 먼저 확인해야 합니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Search size={18} /> Anomaly ribbon</h3>
@@ -888,26 +906,41 @@ export default function App() {
                 {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.chamber === 'CVD-03' ? 'hot' : ''} />)}
               </div>
               <p>조건부 서식보다 작은 공간에서 이상 구간의 연속성을 보여줍니다.</p>
+              <VizExplain>
+                긴 띠는 시간순 공정 기록을 압축한 것입니다. 빨간 칸이 띄엄띄엄 하나씩 나오면 일시적 흔들림일 수 있지만, 연속으로 이어지면 같은 원인이 계속 영향을 주고 있을 가능성이 큽니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Activity size={18} /> Thickness distribution</h3>
               <DistributionBars />
               <p>전체 분포가 목표값 근처에 모여 있는지, spec 밖 꼬리가 생겼는지 확인합니다.</p>
+              <VizExplain>
+                전체 두께 값이 어느 범위에 많이 몰려 있는지 보는 그림입니다. 가운데 구간이 높으면 대부분 목표 두께 근처에 있다는 뜻입니다. 양쪽 끝 구간이 커지면 너무 얇거나 두꺼운 웨이퍼가 늘어난 것입니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Gauge size={18} /> Zone uniformity delta</h3>
               <ZoneUniformity />
               <p>Center, Middle, Edge 위치별 평균 차이로 막 균일도 문제를 빠르게 봅니다.</p>
+              <VizExplain>
+                웨이퍼 중앙, 중간, 가장자리의 평균 두께 차이를 봅니다. 반도체 공정에서는 한 장의 웨이퍼 안에서도 위치별 두께가 비슷해야 합니다. 가장자리만 얇거나 중앙만 두꺼우면 가스 분포나 온도 분포가 균일하지 않을 수 있습니다.
+              </VizExplain>
             </div>
             <div className="viz-card large">
               <h3><Layers3 size={18} /> Time-resolved wafer heatmap</h3>
               <TimeResolvedWaferHeatmap />
               <p>증착 시간이 늘어날수록 웨이퍼 내 위치별 두께 분포가 어떻게 변하는지 동적으로 비교합니다.</p>
+              <VizExplain>
+                같은 웨이퍼를 시간별 사진처럼 나눠 본 것입니다. 시간이 지나며 전체 색이 고르게 진해지면 박막이 균일하게 자라는 상태입니다. 특정 방향만 빠르게 진해지면 그 위치에 가스가 더 많이 닿거나 온도 조건이 달랐을 가능성을 의심합니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Search size={18} /> Risk lot ranking</h3>
               <RiskLotRanking />
               <p>Lot별 range와 spec out을 합쳐 재측정 또는 hold 후보를 정렬합니다.</p>
+              <VizExplain>
+                Lot은 같이 처리된 제품 묶음입니다. 이 순위는 어떤 묶음부터 다시 측정하거나 출하 보류할지 정하는 데 씁니다. 평균만 보는 것이 아니라, 묶음 안의 들쭉날쭉함과 기준 이탈 개수를 함께 봅니다.
+              </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Sparkles size={18} /> Root-cause hint matrix</h3>
@@ -918,16 +951,25 @@ export default function App() {
                 <div><span>Lot range 증가</span><strong>Recipe 안정화 시간</strong></div>
               </div>
               <p>시각화 결과를 공정 확인 항목으로 연결하는 힌트 테이블입니다.</p>
+              <VizExplain>
+                이 표는 결과와 원인 후보를 연결하는 안내판입니다. 예를 들어 두께가 계속 올라가면 가스 유량이나 온도 과승온을 의심하고, 가장자리만 다르면 장비 내부의 가스 분사 균일도를 확인합니다. 원인을 확정하는 표가 아니라 다음 점검 순서를 정하는 표입니다.
+              </VizExplain>
             </div>
             <div className="viz-card large wow-card">
               <h3><Sparkles size={18} /> 3D-like wafer surface map</h3>
               <WaferSurfaceMap />
               <p>숫자 표를 보지 않아도 두께가 높아지는 영역이 표면 열감처럼 보이도록 만든 시각화입니다.</p>
+              <VizExplain>
+                웨이퍼 위 여러 측정 위치를 실제 표면처럼 배치한 그림입니다. 색이 튀는 영역은 그 위치의 두께가 주변과 다르다는 뜻입니다. 비전공자에게도 “웨이퍼의 어느 쪽이 문제인지”를 직관적으로 보여주기 좋습니다.
+              </VizExplain>
             </div>
             <div className="viz-card large">
               <h3><Activity size={18} /> Normal vs Problem visual diagnosis</h3>
               <NormalProblemCompare />
               <p>정상 상태와 문제 상태를 나란히 두어 보고자가 “무엇이 달라졌는지” 즉시 설명할 수 있게 합니다.</p>
+              <VizExplain>
+                왼쪽은 이상이 거의 없는 기준 모습이고, 오른쪽은 문제가 의심되는 모습입니다. 두 그림을 나란히 놓으면 복잡한 수치를 몰라도 차이를 바로 볼 수 있습니다. 회의에서는 이 방식이 가장 빠르게 공감대를 만들 수 있습니다.
+              </VizExplain>
             </div>
           </div>
           <div className="report-panel">
