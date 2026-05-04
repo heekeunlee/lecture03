@@ -118,19 +118,7 @@ const avgThickness = thicknessData.reduce((sum, row) => sum + row.thickness, 0) 
 const maxThickness = Math.max(...thicknessData.map((row) => row.thickness));
 const minThickness = Math.min(...thicknessData.map((row) => row.thickness));
 const outliers = thicknessData.filter((row) => row.thickness < 2.35 || row.thickness > 2.75);
-const chamberNames = ['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'];
 const zoneNames = ['Center', 'Middle', 'Edge'];
-
-const chamberStats = chamberNames.map((chamber) => {
-  const rows = thicknessData.filter((row) => row.chamber === chamber);
-  const avg = rows.reduce((sum, row) => sum + row.thickness, 0) / rows.length;
-  const firstHalf = rows.slice(0, Math.floor(rows.length / 2));
-  const secondHalf = rows.slice(Math.floor(rows.length / 2));
-  const early = firstHalf.reduce((sum, row) => sum + row.thickness, 0) / firstHalf.length;
-  const late = secondHalf.reduce((sum, row) => sum + row.thickness, 0) / secondHalf.length;
-  const specOut = rows.filter((row) => row.thickness < 2.35 || row.thickness > 2.75).length;
-  return { chamber, avg, drift: late - early, specOut };
-});
 
 const zoneStats = zoneNames.map((zone) => {
   const rows = thicknessData.filter((row) => row.zone === zone);
@@ -479,29 +467,130 @@ function SpecTimeline() {
 }
 
 function DistributionBars() {
+  const scatter = Array.from({ length: 68 }, (_, index) => {
+    const isEdge = index % 5 === 0 || index > 55;
+    const x = 54 + index * 6.8;
+    const base = 2.49 + Math.sin(index * 0.62) * 0.045 + Math.cos(index * 0.19) * 0.035;
+    const edgeRise = isEdge ? 0.18 + Math.max(index - 54, 0) * 0.012 : 0;
+    const value = base + edgeRise;
+    const y = 238 - ((value - 2.32) / 0.58) * 178;
+    return { x, y, value, isEdge, out: value > 2.75 };
+  });
+
   return (
     <div className="distribution-curve">
-      <svg viewBox="0 0 560 220" role="img" aria-label="두께 분포곡선과 박스플롯">
+      <div className="plot-header">
+        <strong>Wafer AUR-CVD-07 · 68-point ellipsometry thickness result</strong>
+        <span>Unit: micrometer · Target 2.50 · USL 2.75</span>
+      </div>
+      <svg viewBox="0 0 560 300" role="img" aria-label="실측형 두께 분포 plot과 박스플롯">
         <defs>
           <linearGradient id="curveFill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="#6366f1" stopOpacity="0.36" />
             <stop offset="100%" stopColor="#6366f1" stopOpacity="0.04" />
           </linearGradient>
         </defs>
-        <rect x="410" y="28" width="88" height="164" rx="8" className="spec-out-zone" />
-        <path className="curve-fill" d="M34 178 C78 170 92 132 124 116 C164 96 194 92 230 110 C270 130 286 172 330 162 C374 152 386 78 430 58 C470 42 510 72 532 104 L532 188 L34 188 Z" />
-        <path className="curve-line" d="M34 178 C78 170 92 132 124 116 C164 96 194 92 230 110 C270 130 286 172 330 162 C374 152 386 78 430 58 C470 42 510 72 532 104" />
-        <line x1="410" y1="28" x2="410" y2="196" className="usl-line" />
-        <text x="414" y="24">USL 2.75</text>
+        <g className="plot-grid">
+          {[60, 105, 150, 195, 240].map((y) => <line key={y} x1="48" x2="526" y1={y} y2={y} />)}
+          {[90, 170, 250, 330, 410, 490].map((x) => <line key={x} x1={x} x2={x} y1="46" y2="244" />)}
+        </g>
+        <rect x="392" y="48" width="132" height="194" rx="8" className="spec-out-zone" />
+        <path className="curve-fill" d="M52 228 C88 218 100 166 132 146 C176 118 232 122 270 144 C314 170 336 218 374 210 C404 204 412 96 446 78 C482 58 512 82 524 126 L524 242 L52 242 Z" />
+        <path className="curve-line" d="M52 228 C88 218 100 166 132 146 C176 118 232 122 270 144 C314 170 336 218 374 210 C404 204 412 96 446 78 C482 58 512 82 524 126" />
+        <line x1="392" y1="46" x2="392" y2="246" className="usl-line" />
+        <line x1="48" y1="244" x2="526" y2="244" className="axis" />
+        <line x1="48" y1="46" x2="48" y2="244" className="axis" />
+        <text x="398" y="42">USL 2.75</text>
+        <text x="50" y="36">Thickness</text>
+        <text x="430" y="278">measurement index</text>
+        {scatter.map((point, index) => (
+          <circle
+            key={index}
+            cx={point.x}
+            cy={point.y}
+            r={point.out ? 4.8 : point.isEdge ? 3.8 : 2.8}
+            className={point.out ? 'sample-point out' : point.isEdge ? 'sample-point edge' : 'sample-point'}
+          />
+        ))}
         <g className="boxplot">
-          <line x1="104" y1="202" x2="486" y2="202" />
-          <rect x="186" y="190" width="174" height="24" rx="5" />
-          <line x1="262" y1="190" x2="262" y2="214" />
-          <circle cx="452" cy="202" r="5" />
-          <circle cx="482" cy="202" r="5" />
+          <line x1="118" y1="266" x2="478" y2="266" />
+          <rect x="206" y="254" width="156" height="24" rx="5" />
+          <line x1="272" y1="254" x2="272" y2="278" />
+          <circle cx="430" cy="266" r="5" />
+          <circle cx="462" cy="266" r="5" />
+          <circle cx="494" cy="266" r="5" />
         </g>
       </svg>
       <p>분포의 오른쪽 꼬리가 USL 밖으로 길어져 Edge 과두께 샘플이 쌓이는 상태입니다.</p>
+    </div>
+  );
+}
+
+function ChamberEquipmentMap() {
+  const rows = [
+    { chamber: 'CVD-01', slot: 'AM', temp: 401, pressure: 2.18, edge: 0.11, status: 'stable' },
+    { chamber: 'CVD-01', slot: 'PM', temp: 403, pressure: 2.20, edge: 0.13, status: 'stable' },
+    { chamber: 'CVD-02', slot: 'AM', temp: 406, pressure: 2.24, edge: 0.18, status: 'watch' },
+    { chamber: 'CVD-02', slot: 'PM', temp: 407, pressure: 2.27, edge: 0.20, status: 'watch' },
+    { chamber: 'CVD-03', slot: 'AM', temp: 413, pressure: 2.33, edge: 0.29, status: 'alert' },
+    { chamber: 'CVD-03', slot: 'PM', temp: 416, pressure: 2.38, edge: 0.35, status: 'alert' },
+    { chamber: 'CVD-04', slot: 'AM', temp: 404, pressure: 2.22, edge: 0.15, status: 'stable' },
+    { chamber: 'CVD-04', slot: 'PM', temp: 405, pressure: 2.25, edge: 0.16, status: 'stable' },
+  ];
+
+  return (
+    <div className="equipment-map">
+      <div className="equipment-head">
+        <span>Chamber</span>
+        <span>Time</span>
+        <span>Temp</span>
+        <span>Pressure</span>
+        <span>Edge delta</span>
+      </div>
+      {rows.map((row) => (
+        <div className={`equipment-row ${row.status}`} key={`${row.chamber}-${row.slot}`}>
+          <strong>{row.chamber}</strong>
+          <span>{row.slot}</span>
+          <i style={{ width: `${(row.temp - 395) * 4.2}%` }}><b>{row.temp} C</b></i>
+          <i style={{ width: `${(row.pressure - 2.1) * 260}%` }}><b>{row.pressure.toFixed(2)} Torr</b></i>
+          <i style={{ width: `${row.edge * 220}%` }}><b>{row.edge.toFixed(2)} um</b></i>
+        </div>
+      ))}
+      <div className="equipment-note">
+        <strong>판독</strong>
+        <p>CVD-03 PM 조건에서 온도와 압력이 함께 높고 Edge delta가 가장 큽니다. 장비 하나만의 결론은 아니지만, stress/bow 실험 전 설비 로그를 우선 대조할 조건입니다.</p>
+      </div>
+    </div>
+  );
+}
+
+function AnomalyTimeline() {
+  const lots = ['L07', 'L08', 'L09', 'L10'];
+  const steps = ['Preheat', 'Dep 0-8m', 'Dep 8-16m', 'Dep 16-24m', 'Dep 24-32m', 'Dep 32-40m', 'Measure'];
+  const status = {
+    L07: ['ok', 'ok', 'ok', 'watch', 'watch', 'watch', 'ok'],
+    L08: ['ok', 'ok', 'ok', 'ok', 'watch', 'watch', 'ok'],
+    L09: ['ok', 'watch', 'watch', 'alert', 'alert', 'alert', 'alert'],
+    L10: ['ok', 'ok', 'ok', 'ok', 'ok', 'watch', 'ok'],
+  } as Record<string, string[]>;
+
+  return (
+    <div className="anomaly-timeline">
+      <div className="anomaly-head">
+        <span>Lot</span>
+        {steps.map((step) => <span key={step}>{step}</span>)}
+      </div>
+      {lots.map((lot) => (
+        <div className={`anomaly-row ${lot === 'L09' ? 'target' : ''}`} key={lot}>
+          <strong>{lot}</strong>
+          {status[lot].map((item, index) => <i key={`${lot}-${index}`} className={item}>{item}</i>)}
+        </div>
+      ))}
+      <div className="anomaly-legend">
+        <span><i className="ok" /> 정상</span>
+        <span><i className="watch" /> Edge delta 증가</span>
+        <span><i className="alert" /> USL 이탈</span>
+      </div>
     </div>
   );
 }
@@ -529,13 +618,29 @@ function ZoneUniformity() {
 function RiskLotRanking() {
   return (
     <div className="risk-ranking">
-      {riskLots.map((lot, index) => (
-        <div key={lot.lot}>
+      {riskLots.map((lot, index) => {
+        const abnormal = index === 0;
+        return (
+        <div key={lot.lot} className={abnormal ? 'lot-card abnormal' : 'lot-card'}>
           <span>#{index + 1}</span>
-          <strong>{lot.lot}</strong>
+          <div className="lot-wafer">
+            {Array.from({ length: 49 }, (_, pointIndex) => {
+              const col = pointIndex % 7;
+              const row = Math.floor(pointIndex / 7);
+              const x = 14 + col * 12;
+              const y = 14 + row * 12;
+              const dx = (x - 50) / 50;
+              const dy = (y - 50) / 50;
+              const r = Math.sqrt(dx * dx + dy * dy);
+              if (r > 0.82) return null;
+              return <i key={pointIndex} style={{ left: `${x}%`, top: `${y}%` }} />;
+            })}
+          </div>
+          <strong>{lot.lot}{abnormal ? ' · 분석 필요' : ''}</strong>
           <p>avg {lot.avg.toFixed(3)} · range {lot.range.toFixed(3)} · spec out {lot.specOut}</p>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -1051,28 +1156,18 @@ export default function App() {
             </div>
             <div className="viz-card">
               <h3><CircuitBoard size={18} /> 챔버 드리프트 맵 (Chamber drift map)</h3>
-              <div className="drift-map">
-                {chamberStats.map((tool) => (
-                  <div key={tool.chamber}>
-                    <span>{tool.chamber}</span>
-                    <motion.i initial={{ width: 0 }} whileInView={{ width: `${Math.min(Math.abs(tool.drift) * 420, 100)}%` }} viewport={{ once: true }} />
-                    <b>{tool.drift >= 0 ? '+' : ''}{tool.drift.toFixed(3)}</b>
-                  </div>
-                ))}
-              </div>
-              <p>챔버별 초반/후반 두께 차이를 비교해 장비성 변화를 확인합니다.</p>
+              <ChamberEquipmentMap />
+              <p>시간대, 온도, 압력, Edge delta를 함께 보며 장비 조건과 두께 불균일의 관계를 확인합니다.</p>
               <VizExplain>
-                막대가 긴 챔버는 시간이 지날수록 두께가 변한 장비입니다. 다만 이번 결론은 챔버 하나의 문제보다 Edge 위치의 반복 과두께가 더 중요합니다.
+                단순히 챔버별 막대 하나만 보는 대신, AM/PM 시간대와 온도/압력 로그를 같이 봅니다. CVD-03 PM 조건처럼 여러 설비 지표가 동시에 높은 구간은 원인 분석 우선순위가 됩니다.
               </VizExplain>
             </div>
             <div className="viz-card">
               <h3><Search size={18} /> 이상 구간 리본 (Anomaly ribbon)</h3>
-              <div className="ribbon">
-                {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.zone === 'Edge' || row.thickness > 2.75 ? 'hot' : ''} />)}
-              </div>
-              <p>Spec 이탈 후보가 시간상 연속으로 발생하는지 압축해서 보여줍니다.</p>
+              <AnomalyTimeline />
+              <p>Lot별 공정 단계에서 언제 Edge delta 증가와 USL 이탈이 시작되는지 보여줍니다.</p>
               <VizExplain>
-                진한 칸이 연속되면 같은 원인이 계속 작동하고 있다는 뜻입니다. Edge 과두께가 특정 구간에 몰리면 해당 Lot은 재측정 또는 hold 후보가 됩니다.
+                기존 리본은 의미가 모호했기 때문에 Lot과 공정 단계를 표처럼 펼쳤습니다. L09는 증착 중반부터 경고가 누적되고 측정 단계에서 USL 이탈로 확정되어 별도 분석 대상입니다.
               </VizExplain>
             </div>
             <div className="viz-card">
