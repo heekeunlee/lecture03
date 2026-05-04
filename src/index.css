@@ -905,7 +905,7 @@ section h2 {
 }
 
 .viz-grid {
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .viz-card.large {
@@ -987,7 +987,7 @@ section h2 {
 
 .drift-map div {
   display: grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 70px 1fr 58px;
   align-items: center;
   gap: 0.8rem;
 }
@@ -1003,6 +1003,13 @@ section h2 {
   height: 12px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--accent), var(--warning));
+}
+
+.drift-map b {
+  color: var(--warning);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-align: right;
 }
 
 .ribbon {
@@ -1021,6 +1028,153 @@ section h2 {
 .ribbon span.hot {
   background: #fecdd3;
   box-shadow: inset 0 0 0 2px rgba(190, 18, 60, 0.25);
+}
+
+.distribution-bars,
+.zone-uniformity,
+.risk-ranking,
+.cause-matrix {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.distribution-bars div {
+  display: grid;
+  grid-template-columns: 78px 1fr 34px;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.distribution-bars span,
+.distribution-bars strong,
+.zone-uniformity span,
+.zone-uniformity strong,
+.zone-uniformity b {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.distribution-bars i {
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f766e, #0071e3);
+}
+
+.zone-uniformity div {
+  display: grid;
+  grid-template-columns: 62px 58px 1fr 58px;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.zone-uniformity i {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.zone-uniformity i.plus {
+  background: #0071e3;
+}
+
+.zone-uniformity i.minus {
+  background: #be123c;
+}
+
+.risk-ranking div {
+  display: grid;
+  grid-template-columns: 34px 78px 1fr;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 0.7rem;
+}
+
+.risk-ranking span {
+  color: var(--warning);
+  font-weight: 900;
+}
+
+.risk-ranking strong {
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.risk-ranking p {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.cause-matrix {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cause-matrix div {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 0.85rem;
+}
+
+.cause-matrix span {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.cause-matrix strong {
+  font-size: 0.92rem;
+  font-weight: 900;
+  word-break: keep-all;
+}
+
+.report-panel {
+  margin-top: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 1.4rem;
+}
+
+.report-panel h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.report-card {
+  border-left: 5px solid var(--accent-2);
+  border-radius: 8px;
+  background: #f0fdfa;
+  padding: 1rem;
+}
+
+.report-card strong {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.report-card p {
+  color: var(--text-secondary);
+  font-family: var(--font-content);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  word-break: keep-all;
 }
 
 .column-row:last-child {
@@ -1314,7 +1468,9 @@ footer.philosophy-section p {
   .drop-list,
   .cvd-animation,
   .tutorial-board,
-  .viz-grid {
+  .viz-grid,
+  .report-grid,
+  .cause-matrix {
     grid-template-columns: 1fr;
   }
 
@@ -1341,7 +1497,10 @@ footer.philosophy-section p {
   .timeline-item,
   .column-row,
   .decision-row,
-  .prompt-step {
+  .prompt-step,
+  .drift-map div,
+  .zone-uniformity div,
+  .risk-ranking div {
     grid-template-columns: 1fr;
     gap: 0.45rem;
   }

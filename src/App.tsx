@@ -99,6 +99,44 @@ const avgThickness = thicknessData.reduce((sum, row) => sum + row.thickness, 0) 
 const maxThickness = Math.max(...thicknessData.map((row) => row.thickness));
 const minThickness = Math.min(...thicknessData.map((row) => row.thickness));
 const outliers = thicknessData.filter((row) => row.thickness < 2.35 || row.thickness > 2.75);
+const chamberNames = ['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'];
+const zoneNames = ['Center', 'Middle', 'Edge'];
+
+const chamberStats = chamberNames.map((chamber) => {
+  const rows = thicknessData.filter((row) => row.chamber === chamber);
+  const avg = rows.reduce((sum, row) => sum + row.thickness, 0) / rows.length;
+  const firstHalf = rows.slice(0, Math.floor(rows.length / 2));
+  const secondHalf = rows.slice(Math.floor(rows.length / 2));
+  const early = firstHalf.reduce((sum, row) => sum + row.thickness, 0) / firstHalf.length;
+  const late = secondHalf.reduce((sum, row) => sum + row.thickness, 0) / secondHalf.length;
+  const specOut = rows.filter((row) => row.thickness < 2.35 || row.thickness > 2.75).length;
+  return { chamber, avg, drift: late - early, specOut };
+});
+
+const zoneStats = zoneNames.map((zone) => {
+  const rows = thicknessData.filter((row) => row.zone === zone);
+  const avg = rows.reduce((sum, row) => sum + row.thickness, 0) / rows.length;
+  return { zone, avg, delta: avg - avgThickness };
+});
+
+const lotStats = Array.from(new Set(thicknessData.map((row) => row.lot))).map((lot) => {
+  const rows = thicknessData.filter((row) => row.lot === lot);
+  const avg = rows.reduce((sum, row) => sum + row.thickness, 0) / rows.length;
+  const range = Math.max(...rows.map((row) => row.thickness)) - Math.min(...rows.map((row) => row.thickness));
+  const specOut = rows.filter((row) => row.thickness < 2.35 || row.thickness > 2.75).length;
+  return { lot, avg, range, specOut };
+});
+
+const riskLots = [...lotStats].sort((a, b) => b.range + b.specOut * 0.08 - (a.range + a.specOut * 0.08)).slice(0, 5);
+const histogramBins = [
+  { label: '<2.35', count: thicknessData.filter((row) => row.thickness < 2.35).length },
+  { label: '2.35-2.45', count: thicknessData.filter((row) => row.thickness >= 2.35 && row.thickness < 2.45).length },
+  { label: '2.45-2.55', count: thicknessData.filter((row) => row.thickness >= 2.45 && row.thickness < 2.55).length },
+  { label: '2.55-2.65', count: thicknessData.filter((row) => row.thickness >= 2.55 && row.thickness < 2.65).length },
+  { label: '2.65-2.75', count: thicknessData.filter((row) => row.thickness >= 2.65 && row.thickness <= 2.75).length },
+  { label: '>2.75', count: thicknessData.filter((row) => row.thickness > 2.75).length },
+];
+const maxBinCount = Math.max(...histogramBins.map((bin) => bin.count));
 
 const ideCards = [
   {
@@ -207,6 +245,25 @@ const dashboardInsights = [
   { label: '의심 패턴', value: 'CVD-03 late drift', icon: Sparkles },
 ];
 
+const engineerReportPoints = [
+  {
+    title: '1. 즉시 보고할 결론',
+    body: `전체 평균은 ${avgThickness.toFixed(3)} micrometer로 목표 2.50 micrometer 근처지만, CVD-03 후반부에서 두께 상승 drift가 관찰됩니다.`,
+  },
+  {
+    title: '2. 우선 확인 장비',
+    body: 'CVD-03의 late run 구간을 우선 확인합니다. 같은 Recipe에서 온도 안정화, gas flow, chamber pressure 로그를 함께 대조해야 합니다.',
+  },
+  {
+    title: '3. 품질 리스크',
+    body: `Spec 2.35-2.75 micrometer 기준 이탈 포인트는 ${outliers.length}개입니다. Lot별 range가 큰 묶음은 재측정 또는 hold 판단 후보입니다.`,
+  },
+  {
+    title: '4. 추가 분석 요청',
+    body: '두께 데이터만으로 원인을 확정하지 말고, MES의 Recipe 변경 이력, PM 이력, 전구체 가스 Lot, 계측기 보정 이력을 추가로 연결합니다.',
+  },
+];
+
 const promptText = `역할: 당신은 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
 입력: 120개 이상의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, chamber, zone, time, thickness입니다.
 작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) zone별 uniformity 4) 시간 흐름에 따른 이상 패턴을 시각화하세요.
@@ -279,6 +336,54 @@ function SpecTimeline() {
       })}
       <b className="spec upper">USL 2.75</b>
       <b className="spec lower">LSL 2.35</b>
+    </div>
+  );
+}
+
+function DistributionBars() {
+  return (
+    <div className="distribution-bars">
+      {histogramBins.map((bin) => (
+        <div key={bin.label}>
+          <span>{bin.label}</span>
+          <motion.i initial={{ width: 0 }} whileInView={{ width: `${(bin.count / maxBinCount) * 100}%` }} viewport={{ once: true }} />
+          <strong>{bin.count}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ZoneUniformity() {
+  return (
+    <div className="zone-uniformity">
+      {zoneStats.map((zone) => (
+        <div key={zone.zone}>
+          <span>{zone.zone}</span>
+          <strong>{zone.avg.toFixed(3)}</strong>
+          <motion.i
+            className={zone.delta < 0 ? 'minus' : 'plus'}
+            initial={{ width: 0 }}
+            whileInView={{ width: `${Math.min(Math.abs(zone.delta) * 650, 100)}%` }}
+            viewport={{ once: true }}
+          />
+          <b>{zone.delta >= 0 ? '+' : ''}{zone.delta.toFixed(3)}</b>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RiskLotRanking() {
+  return (
+    <div className="risk-ranking">
+      {riskLots.map((lot, index) => (
+        <div key={lot.lot}>
+          <span>#{index + 1}</span>
+          <strong>{lot.lot}</strong>
+          <p>avg {lot.avg.toFixed(3)} · range {lot.range.toFixed(3)} · spec out {lot.specOut}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -572,6 +677,10 @@ export default function App() {
       <section>
         <span className="section-label">09. 완성 대시보드</span>
         <h2><BarChart3 size={24} /> 엑셀 기본 차트를 넘어서는 <mark>공정 시각화</mark></h2>
+        <p className="section-intro">
+          이 섹션의 목적은 예쁜 차트를 많이 만드는 것이 아니라, 120개 두께 데이터에서 “어디가 이상한가, 얼마나 심각한가,
+          엔지니어가 무엇을 확인해야 하는가”를 단계적으로 좁혀가는 과정을 보여주는 것입니다.
+        </p>
         <div className="dashboard">
           <div className="summary-grid">
             {dashboardInsights.map((card) => (
@@ -596,10 +705,11 @@ export default function App() {
             <div className="viz-card">
               <h3><CircuitBoard size={18} /> Chamber drift map</h3>
               <div className="drift-map">
-                {['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'].map((tool) => (
-                  <div key={tool}>
-                    <span>{tool}</span>
-                    <motion.i initial={{ width: 0 }} whileInView={{ width: tool === 'CVD-03' ? '92%' : '46%' }} viewport={{ once: true }} />
+                {chamberStats.map((tool) => (
+                  <div key={tool.chamber}>
+                    <span>{tool.chamber}</span>
+                    <motion.i initial={{ width: 0 }} whileInView={{ width: `${Math.min(Math.abs(tool.drift) * 420, 100)}%` }} viewport={{ once: true }} />
+                    <b>{tool.drift >= 0 ? '+' : ''}{tool.drift.toFixed(3)}</b>
                   </div>
                 ))}
               </div>
@@ -611,6 +721,42 @@ export default function App() {
                 {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.chamber === 'CVD-03' ? 'hot' : ''} />)}
               </div>
               <p>조건부 서식보다 작은 공간에서 이상 구간의 연속성을 보여줍니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><Activity size={18} /> Thickness distribution</h3>
+              <DistributionBars />
+              <p>전체 분포가 목표값 근처에 모여 있는지, spec 밖 꼬리가 생겼는지 확인합니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><Gauge size={18} /> Zone uniformity delta</h3>
+              <ZoneUniformity />
+              <p>Center, Middle, Edge 위치별 평균 차이로 막 균일도 문제를 빠르게 봅니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><Search size={18} /> Risk lot ranking</h3>
+              <RiskLotRanking />
+              <p>Lot별 range와 spec out을 합쳐 재측정 또는 hold 후보를 정렬합니다.</p>
+            </div>
+            <div className="viz-card">
+              <h3><Sparkles size={18} /> Root-cause hint matrix</h3>
+              <div className="cause-matrix">
+                <div><span>두께 상승</span><strong>Gas flow / Temp overshoot</strong></div>
+                <div><span>Edge 저하</span><strong>Susceptor / showerhead 균일도</strong></div>
+                <div><span>후반 drift</span><strong>Chamber seasoning / pressure</strong></div>
+                <div><span>Lot range 증가</span><strong>Recipe 안정화 시간</strong></div>
+              </div>
+              <p>시각화 결과를 공정 확인 항목으로 연결하는 힌트 테이블입니다.</p>
+            </div>
+          </div>
+          <div className="report-panel">
+            <h3>엔지니어 최종 보고 포인트</h3>
+            <div className="report-grid">
+              {engineerReportPoints.map((point) => (
+                <div className="report-card" key={point.title}>
+                  <strong>{point.title}</strong>
+                  <p>{point.body}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
