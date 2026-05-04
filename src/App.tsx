@@ -1173,6 +1173,11 @@ export default function App() {
               <h3><Boxes size={18} /> 웨이퍼 위치 열지도 스트립 (Wafer-zone heat strip)</h3>
               <ThicknessHeatStrip />
               <p>120개 측정값을 위치와 시간 순서의 얇은 열지도 띠로 압축합니다.</p>
+              <div className="reading-guide">
+                <span>1. 왼쪽에서 오른쪽으로 측정 순서를 봅니다.</span>
+                <span>2. 보라색이 짙은 칸은 두께가 높은 지점입니다.</span>
+                <span>3. 짙은 칸이 일정 간격으로 반복되면 Edge 위치성 문제를 의심합니다.</span>
+              </div>
               <VizExplain>
                 보라색이 짙을수록 두께가 높습니다. Edge 샘플이 반복적으로 짙게 나타나면 단발성 측정 오류가 아니라 위치성 불균일일 가능성이 큽니다.
               </VizExplain>

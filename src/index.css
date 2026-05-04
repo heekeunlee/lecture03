@@ -1332,6 +1332,25 @@ section h2 {
   padding: 0.85rem 0.95rem;
 }
 
+.reading-guide {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  background: #eef2ff;
+  padding: 0.8rem;
+}
+
+.reading-guide span {
+  color: #3730a3;
+  font-family: var(--font-content);
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
 .viz-explain strong {
   display: block;
   margin-bottom: 0.35rem;
