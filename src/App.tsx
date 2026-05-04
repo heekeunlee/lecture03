@@ -89,8 +89,8 @@ const thicknessData = Array.from({ length: 120 }, (_, index) => {
   const zone = ['Center', 'Middle', 'Edge'][index % 3];
   const chamber = ['CVD-01', 'CVD-02', 'CVD-03', 'CVD-04'][index % 4];
   const lotNo = Math.floor(index / 10) + 1;
-  const drift = index > 72 && chamber === 'CVD-03' ? 0.24 : 0;
-  const edgeBias = zone === 'Edge' ? -0.11 : zone === 'Center' ? 0.06 : 0;
+  const drift = index > 72 && zone === 'Edge' ? 0.12 : 0;
+  const edgeBias = zone === 'Edge' ? 0.22 : zone === 'Center' ? -0.05 : 0.02;
   const wave = Math.sin(index * 0.47) * 0.08 + Math.cos(index * 0.19) * 0.05;
   const thickness = 2.52 + drift + edgeBias + wave;
   return {
@@ -107,7 +107,7 @@ const datasetPreview = thicknessData.slice(0, 14);
 const waferPositions = ['C', 'N', 'E', 'S', 'W', 'NE', 'SE', 'SW', 'NW'];
 const depositionTimeSlices = [0, 8, 16, 24, 32, 40].map((minute, timeIndex) => (
   waferPositions.map((position, positionIndex) => {
-    const radialBias = position === 'C' ? 0.03 : position.length === 1 ? -0.02 : -0.07;
+    const radialBias = position === 'C' ? -0.04 : position.length === 1 ? 0.04 : 0.11;
     const showerheadPattern = Math.sin((positionIndex + 1) * 1.7 + timeIndex * 0.8) * 0.025;
     const lateDrift = timeIndex > 3 && ['NE', 'E', 'SE'].includes(position) ? 0.08 + timeIndex * 0.012 : 0;
     const thickness = 0.35 + minute * 0.052 + radialBias + showerheadPattern + lateDrift;
@@ -147,16 +147,6 @@ const lotStats = Array.from(new Set(thicknessData.map((row) => row.lot))).map((l
 });
 
 const riskLots = [...lotStats].sort((a, b) => b.range + b.specOut * 0.08 - (a.range + a.specOut * 0.08)).slice(0, 5);
-const histogramBins = [
-  { label: '<2.35', count: thicknessData.filter((row) => row.thickness < 2.35).length },
-  { label: '2.35-2.45', count: thicknessData.filter((row) => row.thickness >= 2.35 && row.thickness < 2.45).length },
-  { label: '2.45-2.55', count: thicknessData.filter((row) => row.thickness >= 2.45 && row.thickness < 2.55).length },
-  { label: '2.55-2.65', count: thicknessData.filter((row) => row.thickness >= 2.55 && row.thickness < 2.65).length },
-  { label: '2.65-2.75', count: thicknessData.filter((row) => row.thickness >= 2.65 && row.thickness <= 2.75).length },
-  { label: '>2.75', count: thicknessData.filter((row) => row.thickness > 2.75).length },
-];
-const maxBinCount = Math.max(...histogramBins.map((bin) => bin.count));
-
 const ideCards = [
   {
     name: 'Cursor',
@@ -165,7 +155,7 @@ const ideCards = [
     use: '이미 프로젝트 구조가 있고, 컴포넌트나 함수 단위로 빠르게 고칠 때 적합합니다.',
     strengths: ['파일 단위 수정이 빠름', '기존 코드 읽기와 부분 리팩터링에 강함', '프론트엔드 컴포넌트 수정 지시가 편함'],
     cautions: ['업무 목표를 너무 크게 주면 중간 확인 없이 엉뚱한 방향으로 갈 수 있음', '데이터 분석 의도를 사용자가 더 자주 쪼개줘야 함'],
-    example: '“src/App.tsx의 CVD 두께 차트에 spec 상한/하한 라인을 추가하고, 이탈 포인트만 빨간색으로 표시해줘.”',
+    example: '“src/App.tsx의 CVD 두께 차트에 spec 상한/하한 라인을 추가하고, Edge 이탈 포인트를 강조해줘.”',
   },
   {
     name: 'Antigravity',
@@ -174,7 +164,7 @@ const ideCards = [
     use: '이번 강의처럼 데이터셋, 화면, 분석 로직, 대시보드를 한 번에 만들 때 사용합니다.',
     strengths: ['프로젝트 전체 맥락을 읽고 계획을 세움', '여러 파일을 함께 수정하는 앱 제작 실습에 적합', '실행 결과와 오류를 바탕으로 다음 수정을 이어가기 좋음'],
     cautions: ['처음 목표가 모호하면 보기 좋은 화면만 만들고 공정 의미를 놓칠 수 있음', 'MES 용어와 판정 기준은 엔지니어가 반드시 제공해야 함'],
-    example: '“CVD 두께 데이터 120개를 만들고, chamber drift와 zone uniformity를 보여주는 React 대시보드를 구현해줘.”',
+    example: '“CVD 두께 데이터 120개를 만들고, Edge 과두께와 center-edge uniformity를 보여주는 React 대시보드를 구현해줘.”',
   },
   {
     name: 'VS Code + Copilot',
@@ -195,7 +185,7 @@ const antigravitySteps = [
   { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 말하되, 결과물 형식과 검증 조건까지 함께 적습니다.', x: 78, y: 26 },
   { target: 'plan', title: '계획 확인 후 승인', body: 'AI가 제안한 작업 계획에서 데이터 생성, 요약 지표, 시각화, 반응형 화면, 빌드 검증이 포함됐는지 확인합니다. 빠진 항목은 구현 전에 바로 추가 지시합니다.', x: 79, y: 48 },
   { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다. 오류 메시지는 요약하지 말고 원문 그대로 붙이는 편이 좋습니다.', x: 46, y: 84 },
-  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명, 모바일 폭을 확인합니다. “보기 좋게”보다 “CVD-03 drift가 더 선명하게 보이게”처럼 구체적으로 말합니다.', x: 55, y: 48 },
+  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명, 모바일 폭을 확인합니다. “보기 좋게”보다 “Edge 과두께가 더 선명하게 보이게”처럼 구체적으로 말합니다.', x: 55, y: 48 },
   { target: 'commit', title: '커밋과 배포', body: '완성 후 git status로 변경 파일을 확인하고, 커밋 메시지를 작성한 뒤 GitHub Pages에 배포합니다. 강의에서는 결과 URL을 열어 수강생에게 완성물을 보여줍니다.', x: 44, y: 16 },
 ];
 
@@ -229,9 +219,9 @@ waferPosition은 C, N, E, S, W, NE, SE, SW, NW로 두고, 화면에는 평균, m
   },
   {
     title: '3차 지시: 웨이퍼 단면과 위치별 시각화 만들기',
-    body: `Excel 기본 차트처럼 막대/꺾은선만 쓰지 말고,
-wafer cross-section film growth animation, wafer position heatmap, spec band timeline, chamber drift map을 추가해줘.
-각 시각화 아래에는 center-edge uniformity, deposition rate, drift 의심 여부를 판단하는 문장을 붙여줘.`,
+    body: `Excel 기본 차트처럼 막대/꺾은선 중심으로 만들지 말고,
+wafer cross-section film growth, wafer position heatmap, thickness distribution curve, box plot, spec band timeline을 추가해줘.
+각 시각화 아래에는 edge-high, center-edge uniformity, spec out 여부를 판단하는 문장을 붙여줘.`,
   },
   {
     title: '4차 지시: pseudo-prompt로 동적 히트맵 추가',
@@ -247,7 +237,7 @@ Add a time scrubber or auto-play animation, then run npm run build and fix layou
 const promptChecklist = [
   '공정 배경: 웨이퍼 CVD 증착 두께와 박막 균일도를 왜 보는지 설명했는가?',
   '데이터 구조: waferId, position, radius, deposition time, 단위, spec 기준을 명시했는가?',
-  '분석 기준: 평균, 범위, center-edge uniformity, deposition rate, drift, spec out을 구분했는가?',
+  '분석 기준: 평균, 범위, center-edge uniformity, deposition rate, edge-high, spec out을 구분했는가?',
   '시각화 요구: 웨이퍼 단면 성장, 위치별 히트맵, 시간별 변화처럼 엑셀 기본 차트와 다른 표현을 지정했는가?',
   '검증 조건: build, 모바일, 용어 주석, 차트 설명까지 확인시켰는가?',
 ];
@@ -255,7 +245,7 @@ const promptChecklist = [
 const excelPain = [
   '120개 샘플을 Lot, 장비, Zone별로 필터링하며 평균과 편차를 반복 계산',
   'Spec 2.35-2.75 micrometer 밖의 데이터를 조건부 서식으로 찾음',
-  'CVD-03의 후반부 drift처럼 시간 순서 패턴을 눈으로 추적',
+  '웨이퍼 Edge 과두께처럼 위치별 두께 패턴을 눈으로 추적',
   'Center/Middle/Edge 위치별 차이를 피벗 테이블과 여러 차트로 따로 확인',
   '보고서용 캡처를 만들 때마다 필터 상태가 바뀌어 재현성이 떨어짐',
 ];
@@ -264,17 +254,17 @@ const dashboardInsights = [
   { label: '평균 두께', value: `${avgThickness.toFixed(3)} micrometer`, icon: Gauge },
   { label: '범위', value: `${minThickness.toFixed(3)} - ${maxThickness.toFixed(3)}`, icon: ScanLine },
   { label: 'Spec 이탈', value: `${outliers.length} points`, icon: Activity },
-  { label: '의심 패턴', value: 'CVD-03 late drift', icon: Sparkles },
+  { label: '의심 패턴', value: 'Edge-high thickness', icon: Sparkles },
 ];
 
 const engineerReportPoints = [
   {
     title: '1. 즉시 보고할 결론',
-    body: `전체 평균은 ${avgThickness.toFixed(3)} micrometer로 목표 2.50 micrometer 근처지만, CVD-03 후반부에서 두께 상승 drift가 관찰됩니다.`,
+    body: `전체 평균은 ${avgThickness.toFixed(3)} micrometer지만, Edge 위치에서 USL 2.75 micrometer를 넘는 두께 상승이 반복됩니다.`,
   },
   {
     title: '2. 우선 확인 장비',
-    body: 'CVD-03의 late run 구간을 우선 확인합니다. 같은 Recipe에서 온도 안정화, gas flow, chamber pressure 로그를 함께 대조해야 합니다.',
+    body: 'Edge-high가 반복되는 Lot을 우선 확인합니다. 같은 Recipe에서 wafer bow, film stress, chuck contact, gas distribution을 함께 대조해야 합니다.',
   },
   {
     title: '3. 품질 리스크',
@@ -282,7 +272,7 @@ const engineerReportPoints = [
   },
   {
     title: '4. 추가 분석 요청',
-    body: '두께 데이터만으로 원인을 확정하지 말고, MES의 Recipe 변경 이력, PM 이력, 전구체 가스 Lot, 계측기 보정 이력을 추가로 연결합니다.',
+    body: '두께 데이터만으로 원인을 확정하지 말고, stress split run, warpage 측정, 온도 map, 계측기 보정 이력을 추가로 연결합니다.',
   },
 ];
 
@@ -361,8 +351,8 @@ const presentationSlides = [
 
 const promptText = `역할: 당신은 웨이퍼 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
 입력: 단일 wafer lot 기준의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer입니다.
-작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) wafer center-edge uniformity 4) 증착 시간에 따른 위치별 박막 성장 패턴을 시각화하세요.
-시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, chamber drift map, fishbone diagram, Pareto chart를 포함하세요.
+작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) wafer edge-high 3) wafer center-edge uniformity 4) 증착 시간에 따른 위치별 박막 성장 패턴을 시각화하세요.
+시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, distribution curve, box plot, fishbone diagram, Pareto chart를 포함하세요.
 결과: 강의용 React 대시보드와 3페이지 발표자료를 만드세요. 발표자료는 가상 반도체 프로젝트 목표, 시간별 edge-high uniformity 변화, film stress/wafer bow 원인 분석과 개선 일정을 포함해야 합니다.`;
 
 function CvdAnimation() {
@@ -439,7 +429,7 @@ function TimeResolvedWaferHeatmap() {
                   <i
                     key={point.position}
                     className={`pos-${point.position.toLowerCase()}`}
-                    style={{ backgroundColor: `rgb(${55 + hot * 195}, ${190 - hot * 105}, ${210 - hot * 170})` }}
+                    style={{ backgroundColor: `hsl(${218 + hot * 45}, 82%, ${86 - hot * 32}%)` }}
                     title={`${point.position}: ${point.thickness} micrometer`}
                   />
                 );
@@ -466,7 +456,7 @@ function ThicknessHeatStrip() {
           <span
             key={row.id}
             title={`${row.lot} ${row.chamber} ${row.zone}: ${row.thickness} micrometer`}
-            style={{ backgroundColor: `rgb(${60 + hot * 180}, ${170 - hot * 80}, ${120 - hot * 70})` }}
+            style={{ backgroundColor: `hsl(${220 + hot * 42}, 82%, ${88 - hot * 35}%)` }}
           />
         );
       })}
@@ -490,14 +480,28 @@ function SpecTimeline() {
 
 function DistributionBars() {
   return (
-    <div className="distribution-bars">
-      {histogramBins.map((bin) => (
-        <div key={bin.label}>
-          <span>{bin.label}</span>
-          <motion.i initial={{ width: 0 }} whileInView={{ width: `${(bin.count / maxBinCount) * 100}%` }} viewport={{ once: true }} />
-          <strong>{bin.count}</strong>
-        </div>
-      ))}
+    <div className="distribution-curve">
+      <svg viewBox="0 0 560 220" role="img" aria-label="두께 분포곡선과 박스플롯">
+        <defs>
+          <linearGradient id="curveFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.36" />
+            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.04" />
+          </linearGradient>
+        </defs>
+        <rect x="410" y="28" width="88" height="164" rx="8" className="spec-out-zone" />
+        <path className="curve-fill" d="M34 178 C78 170 92 132 124 116 C164 96 194 92 230 110 C270 130 286 172 330 162 C374 152 386 78 430 58 C470 42 510 72 532 104 L532 188 L34 188 Z" />
+        <path className="curve-line" d="M34 178 C78 170 92 132 124 116 C164 96 194 92 230 110 C270 130 286 172 330 162 C374 152 386 78 430 58 C470 42 510 72 532 104" />
+        <line x1="410" y1="28" x2="410" y2="196" className="usl-line" />
+        <text x="414" y="24">USL 2.75</text>
+        <g className="boxplot">
+          <line x1="104" y1="202" x2="486" y2="202" />
+          <rect x="186" y="190" width="174" height="24" rx="5" />
+          <line x1="262" y1="190" x2="262" y2="214" />
+          <circle cx="452" cy="202" r="5" />
+          <circle cx="482" cy="202" r="5" />
+        </g>
+      </svg>
+      <p>분포의 오른쪽 꼬리가 USL 밖으로 길어져 Edge 과두께 샘플이 쌓이는 상태입니다.</p>
     </div>
   );
 }
@@ -568,11 +572,11 @@ function WaferSurfaceMap() {
               return (
                 <span
                   key={index}
-                  className="contour-cell"
+                  className={point.value > 2.75 ? 'contour-cell out-spec' : 'contour-cell'}
                   style={{
                     left: `${point.x}%`,
                     top: `${point.y}%`,
-                    backgroundColor: `hsl(${250 - hot * 250}, 88%, ${72 - hot * 18}%)`,
+                    backgroundColor: `hsl(${222 + hot * 38}, 86%, ${84 - hot * 34}%)`,
                   }}
                   title={`${point.value.toFixed(3)} micrometer`}
                 />
@@ -623,14 +627,14 @@ function NormalProblemCompare() {
         <div className="state-wafer">
           {Array.from({ length: 36 }, (_, index) => <span key={index} />)}
         </div>
-        <p>두께 분포가 목표 중심에 모이고 chamber별 drift가 작습니다.</p>
+        <p>두께 분포가 목표 중심에 모이고 center-edge 차이가 작습니다.</p>
       </div>
       <div className="state-card problem">
         <strong>문제 진단 상태</strong>
         <div className="state-wafer">
           {Array.from({ length: 36 }, (_, index) => <span key={index} className={index > 22 || index % 11 === 0 ? 'bad' : ''} />)}
         </div>
-        <p>CVD-03 후반부와 특정 zone에서 고두께 영역이 도드라집니다.</p>
+        <p>웨이퍼 가장자리에서 spec을 벗어난 고두께 영역이 도드라집니다.</p>
       </div>
     </div>
   );
@@ -976,10 +980,10 @@ export default function App() {
 
       <section>
         <span className="section-label">09. 완성 대시보드</span>
-        <h2><BarChart3 size={24} /> 엑셀 기본 차트를 넘어서는 <mark>공정 시각화</mark></h2>
+        <h2><BarChart3 size={24} /> Edge 과두께를 좁혀가는 <mark>공정 시각화</mark></h2>
         <p className="section-intro">
-          이 섹션의 목적은 예쁜 차트를 많이 만드는 것이 아니라, 120개 두께 데이터에서 “어디가 이상한가, 얼마나 심각한가,
-          엔지니어가 무엇을 확인해야 하는가”를 단계적으로 좁혀가는 과정을 보여주는 것입니다.
+          이 섹션은 여러 차트를 한 화면에 좁게 나열하지 않고, 보고서처럼 위에서 아래로 읽으며 “웨이퍼 가장자리 두께가 왜 spec을 벗어났는가”를
+          단계적으로 확인하도록 구성했습니다.
         </p>
         <div className="dashboard">
           <div className="summary-grid">
@@ -993,23 +997,23 @@ export default function App() {
           </div>
           <div className="viz-grid">
             <div className="viz-card large">
-              <h3><LineChart size={18} /> Spec band timeline</h3>
+              <h3><LineChart size={18} /> 스펙 밴드 시간 추적 (Spec band timeline)</h3>
               <SpecTimeline />
-              <p>관리 상한/하한을 배경 밴드로 두고 시간순 두께 변화를 한눈에 봅니다.</p>
+              <p>USL/LSL 기준 안에 두께가 들어오는지 시간 순서로 확인합니다.</p>
               <VizExplain>
-                제품마다 허용되는 두께 범위가 있습니다. 점들이 위아래 기준선 안에 모여 있으면 공정이 안정적이고, 선 밖으로 튀면 불량 후보입니다. 시간 뒤쪽으로 갈수록 점들이 한 방향으로 밀리면 장비 상태가 서서히 변하고 있다는 신호입니다.
+                Edge 위치 샘플이 후반으로 갈수록 USL 위쪽에 가까워집니다. 이 그림은 “언제부터 두께가 기준 밖으로 밀리기 시작했는가”를 확인하는 첫 관문입니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Boxes size={18} /> Wafer-zone heat strip</h3>
+              <h3><Boxes size={18} /> 웨이퍼 위치 열지도 스트립 (Wafer-zone heat strip)</h3>
               <ThicknessHeatStrip />
-              <p>120개 측정값을 위치/시간 순서의 열 지도로 압축합니다.</p>
+              <p>120개 측정값을 위치와 시간 순서의 얇은 열지도 띠로 압축합니다.</p>
               <VizExplain>
-                표의 숫자를 색으로 바꾼 그림입니다. 차가운 색은 얇은 막, 따뜻한 색은 두꺼운 막을 뜻합니다. 같은 색이 고르게 반복되면 안정적이고, 특정 구간만 색이 진해지면 그 시간대나 위치에서 두께가 달라졌다는 뜻입니다.
+                보라색이 짙을수록 두께가 높습니다. Edge 샘플이 반복적으로 짙게 나타나면 단발성 측정 오류가 아니라 위치성 불균일일 가능성이 큽니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><CircuitBoard size={18} /> Chamber drift map</h3>
+              <h3><CircuitBoard size={18} /> 챔버 드리프트 맵 (Chamber drift map)</h3>
               <div className="drift-map">
                 {chamberStats.map((tool) => (
                   <div key={tool.chamber}>
@@ -1019,80 +1023,80 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <p>CVD-03 후반부에서 두께가 위로 밀리는 drift 후보를 강조합니다.</p>
+              <p>챔버별 초반/후반 두께 차이를 비교해 장비성 변화를 확인합니다.</p>
               <VizExplain>
-                챔버는 웨이퍼를 처리하는 공정 장비 공간입니다. 막대가 길수록 초반과 후반의 두께 차이가 크다는 뜻입니다. 특정 챔버만 값이 커지면 그 장비의 압력, 가스 유량, 온도 안정화 상태를 먼저 확인해야 합니다.
+                막대가 긴 챔버는 시간이 지날수록 두께가 변한 장비입니다. 다만 이번 결론은 챔버 하나의 문제보다 Edge 위치의 반복 과두께가 더 중요합니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Search size={18} /> Anomaly ribbon</h3>
+              <h3><Search size={18} /> 이상 구간 리본 (Anomaly ribbon)</h3>
               <div className="ribbon">
-                {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.chamber === 'CVD-03' ? 'hot' : ''} />)}
+                {thicknessData.slice(60, 96).map((row) => <span key={row.id} className={row.zone === 'Edge' || row.thickness > 2.75 ? 'hot' : ''} />)}
               </div>
-              <p>조건부 서식보다 작은 공간에서 이상 구간의 연속성을 보여줍니다.</p>
+              <p>Spec 이탈 후보가 시간상 연속으로 발생하는지 압축해서 보여줍니다.</p>
               <VizExplain>
-                긴 띠는 시간순 공정 기록을 압축한 것입니다. 빨간 칸이 띄엄띄엄 하나씩 나오면 일시적 흔들림일 수 있지만, 연속으로 이어지면 같은 원인이 계속 영향을 주고 있을 가능성이 큽니다.
+                진한 칸이 연속되면 같은 원인이 계속 작동하고 있다는 뜻입니다. Edge 과두께가 특정 구간에 몰리면 해당 Lot은 재측정 또는 hold 후보가 됩니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Activity size={18} /> Thickness distribution</h3>
+              <h3><Activity size={18} /> 두께 분포곡선과 박스플롯 (Thickness distribution)</h3>
               <DistributionBars />
-              <p>전체 분포가 목표값 근처에 모여 있는지, spec 밖 꼬리가 생겼는지 확인합니다.</p>
+              <p>전체 두께 분포의 오른쪽 꼬리와 이상치를 함께 확인합니다.</p>
               <VizExplain>
-                전체 두께 값이 어느 범위에 많이 몰려 있는지 보는 그림입니다. 가운데 구간이 높으면 대부분 목표 두께 근처에 있다는 뜻입니다. 양쪽 끝 구간이 커지면 너무 얇거나 두꺼운 웨이퍼가 늘어난 것입니다.
+                단순 막대가 아니라 분포곡선과 박스플롯으로 봅니다. 오른쪽 꼬리와 점 이상치가 USL 밖으로 밀리면 Edge 과두께가 품질 리스크로 커졌다는 뜻입니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Gauge size={18} /> Zone uniformity delta</h3>
+              <h3><Gauge size={18} /> 위치별 균일도 차이 (Zone uniformity delta)</h3>
               <ZoneUniformity />
-              <p>Center, Middle, Edge 위치별 평균 차이로 막 균일도 문제를 빠르게 봅니다.</p>
+              <p>Center, Middle, Edge 평균 두께 차이로 위치성 문제를 확인합니다.</p>
               <VizExplain>
-                웨이퍼 중앙, 중간, 가장자리의 평균 두께 차이를 봅니다. 반도체 공정에서는 한 장의 웨이퍼 안에서도 위치별 두께가 비슷해야 합니다. 가장자리만 얇거나 중앙만 두꺼우면 가스 분포나 온도 분포가 균일하지 않을 수 있습니다.
+                Edge 평균이 Center보다 높으면 웨이퍼 가장자리에서 막이 더 빨리 자란 것입니다. 이번 스토리의 핵심 증거입니다.
               </VizExplain>
             </div>
             <div className="viz-card large">
-              <h3><Layers3 size={18} /> Time-resolved wafer heatmap</h3>
+              <h3><Layers3 size={18} /> 시간별 웨이퍼 히트맵 (Time-resolved wafer heatmap)</h3>
               <TimeResolvedWaferHeatmap />
-              <p>증착 시간이 늘어날수록 웨이퍼 내 위치별 두께 분포가 어떻게 변하는지 동적으로 비교합니다.</p>
+              <p>증착 시간이 늘어날수록 Edge가 어떻게 짙어지는지 비교합니다.</p>
               <VizExplain>
-                같은 웨이퍼를 시간별 사진처럼 나눠 본 것입니다. 시간이 지나며 전체 색이 고르게 진해지면 박막이 균일하게 자라는 상태입니다. 특정 방향만 빠르게 진해지면 그 위치에 가스가 더 많이 닿거나 온도 조건이 달랐을 가능성을 의심합니다.
+                파랑/보라 계열에서 Edge ring이 점점 진해지는 흐름을 봅니다. 시간이 지날수록 가장자리가 먼저 spec 밖으로 나가므로 stress, bow, edge 열분포를 우선 확인해야 합니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Search size={18} /> Risk lot ranking</h3>
+              <h3><Search size={18} /> 위험 Lot 순위 (Risk lot ranking)</h3>
               <RiskLotRanking />
-              <p>Lot별 range와 spec out을 합쳐 재측정 또는 hold 후보를 정렬합니다.</p>
+              <p>Edge 과두께가 큰 Lot부터 재측정 또는 hold 후보로 정렬합니다.</p>
               <VizExplain>
                 Lot은 같이 처리된 제품 묶음입니다. 이 순위는 어떤 묶음부터 다시 측정하거나 출하 보류할지 정하는 데 씁니다. 평균만 보는 것이 아니라, 묶음 안의 들쭉날쭉함과 기준 이탈 개수를 함께 봅니다.
               </VizExplain>
             </div>
             <div className="viz-card">
-              <h3><Sparkles size={18} /> Root-cause hint matrix</h3>
+              <h3><Sparkles size={18} /> 원인 후보 매트릭스 (Root-cause hint matrix)</h3>
               <div className="cause-matrix">
-                <div><span>두께 상승</span><strong>Gas flow / Temp overshoot</strong></div>
-                <div><span>Edge 저하</span><strong>Susceptor / showerhead 균일도</strong></div>
-                <div><span>후반 drift</span><strong>Chamber seasoning / pressure</strong></div>
-                <div><span>Lot range 증가</span><strong>Recipe 안정화 시간</strong></div>
+                <div><span>Edge 과두께</span><strong>Wafer bow / film stress</strong></div>
+                <div><span>Ring 패턴</span><strong>Chuck contact / edge temperature</strong></div>
+                <div><span>시간 후반 심화</span><strong>Stress accumulation</strong></div>
+                <div><span>Lot range 증가</span><strong>Low-stress recipe DOE</strong></div>
               </div>
               <p>시각화 결과를 공정 확인 항목으로 연결하는 힌트 테이블입니다.</p>
               <VizExplain>
-                이 표는 결과와 원인 후보를 연결하는 안내판입니다. 예를 들어 두께가 계속 올라가면 가스 유량이나 온도 과승온을 의심하고, 가장자리만 다르면 장비 내부의 가스 분사 균일도를 확인합니다. 원인을 확정하는 표가 아니라 다음 점검 순서를 정하는 표입니다.
+                Edge가 두껍고 ring 형태로 반복되면 wafer bow와 film stress를 먼저 의심합니다. 이 표는 원인을 확정하는 표가 아니라 실험 우선순위를 정하는 표입니다.
               </VizExplain>
             </div>
             <div className="viz-card large wow-card">
-              <h3><Sparkles size={18} /> Dense wafer thickness metrology map</h3>
+              <h3><Sparkles size={18} /> 촘촘한 웨이퍼 두께 계측맵 (Dense wafer thickness metrology map)</h3>
               <WaferSurfaceMap />
-              <p>증착 후 웨이퍼 전면을 촘촘하게 측정한 박막두께 결과를 다색 컬러맵으로 보여줍니다.</p>
+              <p>증착 후 웨이퍼 전면을 촘촘히 측정한 박막두께 결과입니다.</p>
               <VizExplain>
-                실제 계측 장비 화면처럼 웨이퍼 안의 많은 측정 지점을 색으로 표시한 그림입니다. 파랑/보라는 상대적으로 얇은 영역, 노랑/빨강은 두꺼운 영역입니다. 가장자리 쪽 색이 강하면 edge-high 막두께 불균일을 의심합니다.
+                실제 계측 장비 화면처럼 많은 측정점을 보여줍니다. 보라색 계열이 짙어지고 Edge에 붉은 외곽 경고가 뜨는 부분은 USL을 벗어난 과두께 영역입니다.
               </VizExplain>
             </div>
             <div className="viz-card large">
-              <h3><Activity size={18} /> Normal vs Problem visual diagnosis</h3>
+              <h3><Activity size={18} /> 정상과 문제 비교 진단 (Normal vs Problem visual diagnosis)</h3>
               <NormalProblemCompare />
-              <p>정상 상태와 문제 상태를 나란히 두어 보고자가 “무엇이 달라졌는지” 즉시 설명할 수 있게 합니다.</p>
+              <p>정상 웨이퍼와 Edge 과두께 웨이퍼를 비교합니다.</p>
               <VizExplain>
-                왼쪽은 이상이 거의 없는 기준 모습이고, 오른쪽은 문제가 의심되는 모습입니다. 두 그림을 나란히 놓으면 복잡한 수치를 몰라도 차이를 바로 볼 수 있습니다. 회의에서는 이 방식이 가장 빠르게 공감대를 만들 수 있습니다.
+                왼쪽은 위치별 색이 고르게 분포한 상태이고, 오른쪽은 가장자리에서 두께가 치솟는 상태입니다. 비전공자도 “문제가 Edge에 있다”는 결론을 바로 이해할 수 있습니다.
               </VizExplain>
             </div>
           </div>
