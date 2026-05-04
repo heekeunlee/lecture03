@@ -321,41 +321,41 @@ const presentationSlides = [
   {
     page: '01',
     visual: 'project',
-    title: 'Project Goal & Evaluation Status',
-    subtitle: 'Aurora Edge AI Sensor · CVD SiN uniformity 확보',
-    diagnosis: 'Aurora Edge AI Sensor는 저조도 이미지 센서의 dark current를 18% 낮추고 pixel-to-pixel sensitivity 편차를 줄이는 가상 프로젝트입니다. 이를 위해 CVD SiN passivation 막이 wafer 전 영역에서 균일해야 합니다.',
+    title: '프로젝트 목표와 평가 현황',
+    subtitle: 'Aurora Edge AI Sensor · CVD SiN 균일도 확보',
+    diagnosis: '목표: 저조도 이미지 센서의 누설전류를 낮추고 픽셀 감도 편차를 줄인다. 핵심 관리 항목은 CVD SiN 막두께 균일도다.',
     normalTitle: '개선 목표',
     issueTitle: '진행 평가',
     actionTitle: '공유 메시지',
-    normal: ['Dark current -18%', 'Sensitivity uniformity +12%', 'Leakage fail rate < 0.8%', 'CVD SiN target 2.50 micrometer'],
-    issue: ['9-point wafer thickness map', 'Center-edge delta 관리', 'Film stress / wafer bow 측정', '전기 특성과 두께 correlation'],
-    action: '두께 uniformity는 단순 공정 지표가 아니라 후속 소자 특성, 수율, 신뢰성까지 연결되는 핵심 관리 항목입니다.',
+    normal: ['Dark current -18%', '감도 균일도 +12%', 'Leakage fail < 0.8%', '목표 두께 2.50 micrometer'],
+    issue: ['9-point 두께 측정', 'Center-edge delta', 'Stress / wafer bow', '전기 특성 correlation'],
+    action: '막두께 균일도는 소자 특성, 수율, 신뢰성을 좌우하는 핵심 공정 지표다.',
   },
   {
     page: '02',
     visual: 'heatmap',
-    title: 'Time-resolved Uniformity Change',
-    subtitle: '증착 시간이 길어질수록 edge ring이 두꺼워지는 패턴',
-    diagnosis: '시간별 wafer heatmap에서 증착 후반으로 갈수록 가장자리 ring 영역의 색이 더 진해집니다. 이는 center보다 edge 박막이 두꺼워지는 edge-high non-uniformity 후보입니다.',
+    title: '시간별 유니포미티 변화',
+    subtitle: '증착 후반 edge ring 두께 상승',
+    diagnosis: '시간별 heatmap에서 후반부로 갈수록 edge 색상이 진해진다. Center보다 edge가 두꺼운 edge-high 패턴이다.',
     normalTitle: '관찰 결과',
     issueTitle: '후속 영향',
     actionTitle: '품질 리스크',
-    normal: ['T+0~16m: 위치별 색 차이 작음', 'T+24m 이후 edge 색상 상승', 'NE/E/SE 방향 thickening 반복', 'Center-edge delta 확대'],
-    issue: ['Lithography focus margin 감소', 'Etch 후 잔막/과식각 편차', 'CD variation 증가', 'Contact resistance 산포', 'Passivation stress crack 가능성'],
-    action: 'Edge가 지속적으로 두꺼우면 다음 공정에서 패턴 폭, 식각 깊이, 접촉 저항, 장기 신뢰성이 동시에 흔들릴 수 있습니다.',
+    normal: ['T+0~16m: 균일', 'T+24m 이후 edge 상승', 'NE/E/SE 반복', 'Center-edge delta 확대'],
+    issue: ['노광 focus margin 감소', 'Etch 편차 증가', 'CD variation 증가', 'Contact resistance 산포', 'Stress crack 가능성'],
+    action: 'Edge-high가 지속되면 패턴, 식각, 저항, 신뢰성이 동시에 흔들린다.',
   },
   {
     page: '03',
     visual: 'rootCause',
-    title: 'Root Cause & Improvement Plan',
-    subtitle: 'Fishbone + Pareto로 원인을 좁히고 개선 일정을 제시',
-    diagnosis: '원인 후보를 온도, 웨이퍼 휨, 막 스트레스, 가스 분포, chuck 접촉, 압력 안정화로 나눠 평가했습니다. Pareto 가중치 기준으로는 film stress와 wafer bow가 가장 큰 영향 인자로 판단됩니다.',
+    title: '원인 분석과 개선 계획',
+    subtitle: 'Fishbone + Pareto 기반 우선순위',
+    diagnosis: '주요 후보는 막 스트레스와 wafer bow다. 두 인자가 center-edge 두께 차이를 키우는 것으로 판단한다.',
     normalTitle: '예상 원인',
     issueTitle: '가중치 결과',
     actionTitle: '결론 및 개선 일정',
-    normal: ['Temperature radial gradient', 'Wafer bow / warpage', 'Film stress 누적', 'Showerhead gas distribution', 'Chuck contact 불균일', 'Recipe ramp 조건'],
-    issue: ['Film stress 34%', 'Wafer bow 26%', 'Temperature map 17%', 'Gas distribution 13%', '기타 10%'],
-    action: '결론: 막 스트레스로 인한 wafer bow가 center-edge 막두께 차이를 키운다. 개선은 stress split run, low-stress recipe DOE, warpage 재측정, 품질 회의 보고 순서로 진행합니다.',
+    normal: ['온도 radial gradient', 'Wafer bow / warpage', '막 스트레스', 'Gas 분포', 'Chuck 접촉', 'Recipe ramp'],
+    issue: ['막 스트레스 34%', 'Wafer bow 26%', '온도 분포 17%', 'Gas 분포 13%', '기타 10%'],
+    action: '결론: stress 기인 wafer bow가 핵심 원인. D0 hold, D1 stress split, D2 low-stress DOE, D3 재측정, D4 품질회의.',
   },
 ];
 
@@ -537,31 +537,46 @@ function RiskLotRanking() {
 }
 
 function WaferSurfaceMap() {
+  const measurementPoints = [
+    { label: 'C', x: 50, y: 50, value: 2.50 },
+    { label: 'N', x: 50, y: 25, value: 2.61 },
+    { label: 'E', x: 75, y: 50, value: 2.68 },
+    { label: 'S', x: 50, y: 75, value: 2.60 },
+    { label: 'W', x: 25, y: 50, value: 2.57 },
+    { label: 'NE', x: 67, y: 33, value: 2.72 },
+    { label: 'SE', x: 67, y: 67, value: 2.70 },
+    { label: 'SW', x: 33, y: 67, value: 2.59 },
+    { label: 'NW', x: 33, y: 33, value: 2.58 },
+  ];
+
   return (
     <div className="wafer-surface">
-      <motion.div
-        className="surface-glow"
-        animate={{ opacity: [0.45, 0.85, 0.45], scale: [0.96, 1.04, 0.96] }}
-        transition={{ duration: 3.8, repeat: Infinity }}
-      />
-      {thicknessData.slice(0, 64).map((row, index) => {
-        const angle = index * 137.5;
-        const radius = 8 + (index % 8) * 10;
-        const hot = (row.thickness - minThickness) / (maxThickness - minThickness);
-        return (
-          <span
-            key={row.id}
-            className={row.chamber === 'CVD-03' && index > 36 ? 'hot' : ''}
-            style={{
-              left: `calc(50% + ${Math.cos(angle) * radius}px)`,
-              top: `calc(50% + ${Math.sin(angle) * radius}px)`,
-              backgroundColor: `rgb(${70 + hot * 180}, ${190 - hot * 110}, ${210 - hot * 160})`,
-            }}
-            title={`${row.chamber} ${row.zone} ${row.thickness} micrometer`}
-          />
-        );
-      })}
-      <b>3D-like wafer thickness surface</b>
+      <div className="wafer-disc">
+        <div className="edge-ring" />
+        <div className="wafer-notch" />
+        {measurementPoints.map((point) => {
+          const hot = (point.value - 2.50) / 0.22;
+          return (
+            <span
+              key={point.label}
+              className={point.value >= 2.68 ? 'hot' : ''}
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                backgroundColor: `rgb(${70 + hot * 155}, ${170 - hot * 65}, ${210 - hot * 145})`,
+              }}
+              title={`${point.label}: ${point.value.toFixed(2)} micrometer`}
+            >
+              {point.label}
+            </span>
+          );
+        })}
+      </div>
+      <div className="wafer-map-note">
+        <strong>Wafer thickness map</strong>
+        <p>Center 2.50 micrometer · Edge max 2.72 micrometer</p>
+        <i><em /> thin <em /> thick</i>
+      </div>
     </div>
   );
 }
