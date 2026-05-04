@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import {
   Activity,
   BarChart3,
@@ -126,15 +127,6 @@ const zoneStats = zoneNames.map((zone) => {
   return { zone, avg, delta: avg - avgThickness };
 });
 
-const lotStats = Array.from(new Set(thicknessData.map((row) => row.lot))).map((lot) => {
-  const rows = thicknessData.filter((row) => row.lot === lot);
-  const avg = rows.reduce((sum, row) => sum + row.thickness, 0) / rows.length;
-  const range = Math.max(...rows.map((row) => row.thickness)) - Math.min(...rows.map((row) => row.thickness));
-  const specOut = rows.filter((row) => row.thickness < 2.35 || row.thickness > 2.75).length;
-  return { lot, avg, range, specOut };
-});
-
-const riskLots = [...lotStats].sort((a, b) => b.range + b.specOut * 0.08 - (a.range + a.specOut * 0.08)).slice(0, 5);
 const ideCards = [
   {
     name: 'Cursor',
@@ -616,28 +608,59 @@ function ZoneUniformity() {
 }
 
 function RiskLotRanking() {
+  const lotMaps = [
+    { lot: 'CVD-L09', rank: 1, avg: 2.61, min: 2.43, max: 2.91, range: 0.48, uniformity: 9.2, pattern: 'Center hot spot + Edge-high', status: '분석 필요', abnormal: true, cx: 47, cy: 43 },
+    { lot: 'CVD-L08', rank: 2, avg: 2.55, min: 2.42, max: 2.72, range: 0.30, uniformity: 5.7, pattern: 'Mild edge rise', status: '관찰', abnormal: false, cx: 55, cy: 48 },
+    { lot: 'CVD-L10', rank: 3, avg: 2.53, min: 2.41, max: 2.69, range: 0.28, uniformity: 5.3, pattern: 'Uniform', status: '정상', abnormal: false, cx: 48, cy: 52 },
+    { lot: 'CVD-L07', rank: 4, avg: 2.51, min: 2.39, max: 2.66, range: 0.27, uniformity: 5.1, pattern: 'Uniform', status: '정상', abnormal: false, cx: 51, cy: 49 },
+    { lot: 'CVD-L11', rank: 5, avg: 2.50, min: 2.38, max: 2.64, range: 0.26, uniformity: 4.9, pattern: 'Uniform', status: '정상', abnormal: false, cx: 50, cy: 50 },
+  ];
+
   return (
     <div className="risk-ranking">
-      {riskLots.map((lot, index) => {
-        const abnormal = index === 0;
+      {lotMaps.map((lot) => {
+        const points = Array.from({ length: 81 }, (_, pointIndex) => {
+          const col = pointIndex % 9;
+          const row = Math.floor(pointIndex / 9);
+          const x = 12 + col * 9.5;
+          const y = 12 + row * 9.5;
+          const dx = (x - 50) / 50;
+          const dy = (y - 50) / 50;
+          const r = Math.sqrt(dx * dx + dy * dy);
+          return { x, y, r };
+        }).filter((point) => point.r <= 0.86);
+
         return (
-        <div key={lot.lot} className={abnormal ? 'lot-card abnormal' : 'lot-card'}>
-          <span>#{index + 1}</span>
-          <div className="lot-wafer">
-            {Array.from({ length: 49 }, (_, pointIndex) => {
-              const col = pointIndex % 7;
-              const row = Math.floor(pointIndex / 7);
-              const x = 14 + col * 12;
-              const y = 14 + row * 12;
-              const dx = (x - 50) / 50;
-              const dy = (y - 50) / 50;
-              const r = Math.sqrt(dx * dx + dy * dy);
-              if (r > 0.82) return null;
-              return <i key={pointIndex} style={{ left: `${x}%`, top: `${y}%` }} />;
-            })}
+        <div key={lot.lot} className={lot.abnormal ? 'lot-card abnormal' : 'lot-card'}>
+          <div className="lot-card-head">
+            <span>#{lot.rank}</span>
+            <strong>{lot.lot}</strong>
+            <b>{lot.status}</b>
           </div>
-          <strong>{lot.lot}{abnormal ? ' · 분석 필요' : ''}</strong>
-          <p>avg {lot.avg.toFixed(3)} · range {lot.range.toFixed(3)} · spec out {lot.specOut}</p>
+          <div className="lot-metrology">
+            <div className="lot-map">
+              <div className="lot-contour" style={{ '--hot-x': `${lot.cx}%`, '--hot-y': `${lot.cy}%` } as CSSProperties}>
+                {points.map((point, pointIndex) => (
+                  <i key={pointIndex} style={{ left: `${point.x}%`, top: `${point.y}%` }} />
+                ))}
+                <em />
+              </div>
+              <div className="lot-scale">
+                <i />
+                <span>{lot.max.toFixed(2)}</span>
+                <span>{lot.avg.toFixed(2)}</span>
+                <span>{lot.min.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="lot-stats">
+              <span>Avg <strong>{lot.avg.toFixed(2)}</strong></span>
+              <span>Min <strong>{lot.min.toFixed(2)}</strong></span>
+              <span>Max <strong>{lot.max.toFixed(2)}</strong></span>
+              <span>Range <strong>{lot.range.toFixed(2)}</strong></span>
+              <span>U% <strong>{lot.uniformity.toFixed(1)}</strong></span>
+            </div>
+          </div>
+          <p>{lot.pattern}</p>
         </div>
         );
       })}
