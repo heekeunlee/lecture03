@@ -620,21 +620,58 @@ function WaferSurfaceMap() {
 }
 
 function NormalProblemCompare() {
+  const points = [
+    { label: 'C', x: 50, y: 50, normal: 2.50, problem: 2.50 },
+    { label: 'N', x: 50, y: 23, normal: 2.51, problem: 2.78 },
+    { label: 'E', x: 77, y: 50, normal: 2.50, problem: 2.82 },
+    { label: 'S', x: 50, y: 77, normal: 2.49, problem: 2.79 },
+    { label: 'W', x: 23, y: 50, normal: 2.51, problem: 2.76 },
+    { label: 'NE', x: 68, y: 32, normal: 2.52, problem: 2.85 },
+    { label: 'SE', x: 68, y: 68, normal: 2.50, problem: 2.83 },
+    { label: 'SW', x: 32, y: 68, normal: 2.49, problem: 2.77 },
+    { label: 'NW', x: 32, y: 32, normal: 2.51, problem: 2.78 },
+  ];
+
   return (
     <div className="normal-problem">
       <div className="state-card normal">
-        <strong>정상 상태</strong>
-        <div className="state-wafer">
-          {Array.from({ length: 36 }, (_, index) => <span key={index} />)}
+        <div className="state-head">
+          <strong>정상 기준</strong>
+          <span>PASS · Edge delta 0.03 um</span>
         </div>
-        <p>두께 분포가 목표 중심에 모이고 center-edge 차이가 작습니다.</p>
+        <div className="diagnosis-wafer normal-map">
+          {points.map((point) => (
+            <i key={point.label} style={{ left: `${point.x}%`, top: `${point.y}%` }}>
+              {point.normal.toFixed(2)}
+            </i>
+          ))}
+        </div>
+        <div className="edge-profile normal-profile">
+          <span>Center</span>
+          <b />
+          <span>Edge</span>
+        </div>
+        <p>중앙과 가장자리 두께가 같은 색상대에 머물러 위치별 편차가 작습니다.</p>
       </div>
       <div className="state-card problem">
-        <strong>문제 진단 상태</strong>
-        <div className="state-wafer">
-          {Array.from({ length: 36 }, (_, index) => <span key={index} className={index > 22 || index % 11 === 0 ? 'bad' : ''} />)}
+        <div className="state-head">
+          <strong>문제 진단</strong>
+          <span>FAIL · Edge max 2.85 um</span>
         </div>
-        <p>웨이퍼 가장자리에서 spec을 벗어난 고두께 영역이 도드라집니다.</p>
+        <div className="diagnosis-wafer problem-map">
+          <em>USL out edge ring</em>
+          {points.map((point) => (
+            <i key={point.label} className={point.problem > 2.75 ? 'out' : ''} style={{ left: `${point.x}%`, top: `${point.y}%` }}>
+              {point.problem.toFixed(2)}
+            </i>
+          ))}
+        </div>
+        <div className="edge-profile problem-profile">
+          <span>Center 2.50</span>
+          <b />
+          <span>Edge 2.85</span>
+        </div>
+        <p>가장자리 ring이 USL 2.75 um을 넘어 후속 노광/식각 공정 리스크가 큽니다.</p>
       </div>
     </div>
   );

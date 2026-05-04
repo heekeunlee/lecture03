@@ -1638,47 +1638,165 @@ section h2 {
 .state-card {
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--bg-secondary);
-  padding: 1rem;
-}
-
-.state-card > strong {
-  display: block;
-  margin-bottom: 0.8rem;
-  font-weight: 900;
-}
-
-.state-card.normal > strong {
-  color: #0f766e;
-}
-
-.state-card.problem > strong {
-  color: var(--warning);
-}
-
-.state-wafer {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
-  margin-bottom: 0.8rem;
-  border-radius: 999px;
   background: #ffffff;
   padding: 1rem;
 }
 
-.state-wafer span {
-  aspect-ratio: 1;
+.state-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.state-head strong {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.state-head span {
   border-radius: 999px;
-  background: #bfdbfe;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
-.state-card.normal .state-wafer span {
-  background: #99f6e4;
+.state-card.normal .state-head strong {
+  color: #0f766e;
 }
 
-.state-wafer span.bad {
-  background: #fb7185;
-  box-shadow: 0 0 0 2px rgba(190, 18, 60, 0.16);
+.state-card.problem .state-head strong {
+  color: #dc2626;
+}
+
+.state-card.normal .state-head span {
+  background: #ecfdf5;
+  color: #0f766e;
+}
+
+.state-card.problem .state-head span {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.diagnosis-wafer {
+  position: relative;
+  width: min(360px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto 0.9rem;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 50%;
+  box-shadow: inset -18px -22px 34px rgba(15, 23, 42, 0.12), 0 14px 28px rgba(15, 23, 42, 0.1);
+}
+
+.diagnosis-wafer::before {
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed rgba(15, 23, 42, 0.2);
+  border-radius: 50%;
+  content: "";
+}
+
+.diagnosis-wafer::after {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 30px;
+  height: 13px;
+  border-radius: 13px 13px 0 0;
+  background: #ffffff;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.diagnosis-wafer.normal-map {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.82), transparent 35%),
+    radial-gradient(circle, #dbeafe 0 62%, #bfdbfe 63% 100%);
+}
+
+.diagnosis-wafer.problem-map {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0 30%, rgba(219, 234, 254, 0.92) 31% 52%, rgba(99, 102, 241, 0.76) 53% 68%, rgba(49, 46, 129, 0.9) 69% 100%);
+  box-shadow: inset 0 0 0 18px rgba(220, 38, 38, 0.18), inset -18px -22px 34px rgba(15, 23, 42, 0.16), 0 14px 28px rgba(15, 23, 42, 0.12);
+}
+
+.diagnosis-wafer em {
+  position: absolute;
+  left: 50%;
+  top: 0.9rem;
+  z-index: 4;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.92);
+  padding: 0.32rem 0.62rem;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
+  transform: translateX(-50%);
+}
+
+.diagnosis-wafer i {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.92);
+  color: #1e3a8a;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 900;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.14);
+  transform: translate(-50%, -50%);
+}
+
+.diagnosis-wafer i.out {
+  background: #312e81;
+  color: #ffffff;
+  outline: 3px solid rgba(220, 38, 38, 0.32);
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.14), 0 8px 18px rgba(49, 46, 129, 0.3);
+}
+
+.edge-profile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.edge-profile b {
+  display: block;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.normal-profile b {
+  background: linear-gradient(90deg, #bfdbfe, #93c5fd, #bfdbfe);
+}
+
+.problem-profile b {
+  background: linear-gradient(90deg, #bfdbfe 0 38%, #6366f1 56%, #312e81 100%);
+}
+
+.state-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-content);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: keep-all;
 }
 
 .ppt-prompt-panel,
