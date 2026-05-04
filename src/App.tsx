@@ -1104,7 +1104,7 @@ export default function App() {
           </div>
         </div>
         <div className="menu-guide">
-          <h3>메뉴별로 수강생에게 설명할 포인트</h3>
+          <h3>Antigravity 화면에서 확인할 작업 흐름</h3>
           <div className="menu-grid">
             {antigravityMenuGuide.map((item) => (
               <div className="menu-card" key={item.menu}>
