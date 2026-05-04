@@ -537,45 +537,79 @@ function RiskLotRanking() {
 }
 
 function WaferSurfaceMap() {
-  const measurementPoints = [
-    { label: 'C', x: 50, y: 50, value: 2.50 },
-    { label: 'N', x: 50, y: 25, value: 2.61 },
-    { label: 'E', x: 75, y: 50, value: 2.68 },
-    { label: 'S', x: 50, y: 75, value: 2.60 },
-    { label: 'W', x: 25, y: 50, value: 2.57 },
-    { label: 'NE', x: 67, y: 33, value: 2.72 },
-    { label: 'SE', x: 67, y: 67, value: 2.70 },
-    { label: 'SW', x: 33, y: 67, value: 2.59 },
-    { label: 'NW', x: 33, y: 33, value: 2.58 },
-  ];
+  const densePoints = Array.from({ length: 121 }, (_, index) => {
+    const col = index % 11;
+    const row = Math.floor(index / 11);
+    const x = 12 + col * 7.6;
+    const y = 12 + row * 7.6;
+    const dx = (x - 50) / 50;
+    const dy = (y - 50) / 50;
+    const radius = Math.sqrt(dx * dx + dy * dy);
+    const angleBias = Math.cos(Math.atan2(dy, dx) * 3 - 0.6) * 0.05;
+    const edgeHigh = Math.max(radius - 0.45, 0) * 0.42;
+    const value = 2.49 + edgeHigh + angleBias;
+    return { x, y, radius, value: Number(value.toFixed(3)) };
+  }).filter((point) => point.radius <= 0.9);
+  const labelPoints = densePoints.filter((_, index) => index % 7 === 0).slice(0, 18);
 
   return (
     <div className="wafer-surface">
-      <div className="wafer-disc">
-        <div className="edge-ring" />
-        <div className="wafer-notch" />
-        {measurementPoints.map((point) => {
-          const hot = (point.value - 2.50) / 0.22;
-          return (
-            <span
-              key={point.label}
-              className={point.value >= 2.68 ? 'hot' : ''}
-              style={{
-                left: `${point.x}%`,
-                top: `${point.y}%`,
-                backgroundColor: `rgb(${70 + hot * 155}, ${170 - hot * 65}, ${210 - hot * 145})`,
-              }}
-              title={`${point.label}: ${point.value.toFixed(2)} micrometer`}
-            >
-              {point.label}
-            </span>
-          );
-        })}
+      <div className="metrology-window">
+        <div className="metrology-main">
+          <div className="color-scale">
+            {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+            <span>2.84</span>
+            <span>2.62</span>
+            <span>2.40</span>
+          </div>
+          <div className="wafer-contour">
+            {densePoints.map((point, index) => {
+              const hot = Math.max(0, Math.min(1, (point.value - 2.40) / 0.44));
+              return (
+                <span
+                  key={index}
+                  className="contour-cell"
+                  style={{
+                    left: `${point.x}%`,
+                    top: `${point.y}%`,
+                    backgroundColor: `hsl(${250 - hot * 250}, 88%, ${72 - hot * 18}%)`,
+                  }}
+                  title={`${point.value.toFixed(3)} micrometer`}
+                />
+              );
+            })}
+            {labelPoints.map((point, index) => (
+              <b key={index} style={{ left: `${point.x}%`, top: `${point.y}%` }}>
+                {(point.value * 10000).toFixed(0)} A
+              </b>
+            ))}
+            <em className="wafer-notch" />
+          </div>
+        </div>
+        <aside className="metrology-panel">
+          <strong>Information</strong>
+          <span>Wafer ID: AUR-CVD-07</span>
+          <span>Map: SiN thickness</span>
+          <span>Recipe: Low stress split</span>
+          <strong>Results</strong>
+          <span>Min: 2.41 um</span>
+          <span>Max: 2.84 um</span>
+          <span>Mean: 2.58 um</span>
+          <span>Uniformity: 6.7%</span>
+          <span>Pattern: Edge-high</span>
+        </aside>
+        <div className="spectrum-panel">
+          <svg viewBox="0 0 320 72" role="img" aria-label="film thickness reflectance spectrum">
+            <polyline points="0,50 24,20 48,58 72,26 96,54 120,35 144,62 168,44 192,26 216,38 240,51 264,60 288,48 320,34" />
+            <path d="M0 50 C24 20 34 18 48 58 S74 24 96 54 124 28 144 62 176 30 192 26 220 42 240 51 280 56 320 34" />
+          </svg>
+          <span>Measured reflectance profile · calculated thickness fit</span>
+        </div>
       </div>
-      <div className="wafer-map-note">
-        <strong>Wafer thickness map</strong>
-        <p>Center 2.50 micrometer · Edge max 2.72 micrometer</p>
-        <i><em /> thin <em /> thick</i>
+      <div className="fab-photo-card">
+        <img src="/lecture03/fab-wafer-engineer.png" alt="방진복을 입은 엔지니어가 트위저로 증착 후 웨이퍼를 들고 있는 모습" />
+        <strong>증착 후 wafer handling</strong>
+        <p>Fab 엔지니어가 CVD 이후 웨이퍼를 트위저로 취급하는 실사형 장면입니다.</p>
       </div>
     </div>
   );
@@ -1046,11 +1080,11 @@ export default function App() {
               </VizExplain>
             </div>
             <div className="viz-card large wow-card">
-              <h3><Sparkles size={18} /> 3D-like wafer surface map</h3>
+              <h3><Sparkles size={18} /> Dense wafer thickness metrology map</h3>
               <WaferSurfaceMap />
-              <p>숫자 표를 보지 않아도 두께가 높아지는 영역이 표면 열감처럼 보이도록 만든 시각화입니다.</p>
+              <p>증착 후 웨이퍼 전면을 촘촘하게 측정한 박막두께 결과를 다색 컬러맵으로 보여줍니다.</p>
               <VizExplain>
-                웨이퍼 위 여러 측정 위치를 실제 표면처럼 배치한 그림입니다. 색이 튀는 영역은 그 위치의 두께가 주변과 다르다는 뜻입니다. 비전공자에게도 “웨이퍼의 어느 쪽이 문제인지”를 직관적으로 보여주기 좋습니다.
+                실제 계측 장비 화면처럼 웨이퍼 안의 많은 측정 지점을 색으로 표시한 그림입니다. 파랑/보라는 상대적으로 얇은 영역, 노랑/빨강은 두꺼운 영역입니다. 가장자리 쪽 색이 강하면 edge-high 막두께 불균일을 의심합니다.
               </VizExplain>
             </div>
             <div className="viz-card large">
