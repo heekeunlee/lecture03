@@ -953,6 +953,13 @@ export default function App() {
           가열, 반응 가스 주입, 표면 반응, 박막 성장, purge, 위치별 두께 측정으로 이어집니다. 이때
           <Term note="설비 조건 묶음. 온도, 압력, 가스 유량, 시간 등을 포함합니다."> Recipe</Term>, 챔버, 증착 시간, 웨이퍼 내 위치별 두께가 모두 데이터가 됩니다.
         </p>
+        <div className="field-image cvd-field-image">
+          <img src="/lecture03/cvd-chamber-wafer.png" alt="CVD 챔버 안에서 웨이퍼가 증착 처리되는 현장 이미지" />
+          <div>
+            <strong>CVD chamber processing scene</strong>
+            <p>챔버 내부에서 웨이퍼가 가열 susceptor 위에 놓이고, showerhead를 통해 반응 가스가 공급되는 장면입니다.</p>
+          </div>
+        </div>
         <CvdAnimation />
       </section>
 
@@ -1150,6 +1157,13 @@ export default function App() {
           이 섹션은 여러 차트를 한 화면에 좁게 나열하지 않고, 보고서처럼 위에서 아래로 읽으며 “웨이퍼 가장자리 두께가 왜 spec을 벗어났는가”를
           단계적으로 확인하도록 구성했습니다.
         </p>
+        <div className="field-image dashboard-field-image">
+          <img src="/lecture03/fab-metrology-context.png" alt="Fab 현장에서 증착 후 웨이퍼 계측으로 이어지는 장면" />
+          <div>
+            <strong>Fab metrology workflow</strong>
+            <p>대시보드의 숫자는 현장에서 웨이퍼를 처리하고 계측 장비로 두께 map을 얻은 뒤 분석되는 데이터라는 맥락을 보여줍니다.</p>
+          </div>
+        </div>
         <div className="dashboard">
           <div className="summary-grid">
             {dashboardInsights.map((card) => (
