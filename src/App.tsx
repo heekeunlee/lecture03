@@ -95,6 +95,16 @@ const thicknessData = Array.from({ length: 120 }, (_, index) => {
 });
 
 const datasetPreview = thicknessData.slice(0, 14);
+const waferPositions = ['C', 'N', 'E', 'S', 'W', 'NE', 'SE', 'SW', 'NW'];
+const depositionTimeSlices = [0, 8, 16, 24, 32, 40].map((minute, timeIndex) => (
+  waferPositions.map((position, positionIndex) => {
+    const radialBias = position === 'C' ? 0.03 : position.length === 1 ? -0.02 : -0.07;
+    const showerheadPattern = Math.sin((positionIndex + 1) * 1.7 + timeIndex * 0.8) * 0.025;
+    const lateDrift = timeIndex > 3 && ['NE', 'E', 'SE'].includes(position) ? 0.08 + timeIndex * 0.012 : 0;
+    const thickness = 0.35 + minute * 0.052 + radialBias + showerheadPattern + lateDrift;
+    return { position, thickness: Number(thickness.toFixed(3)) };
+  })
+));
 const avgThickness = thicknessData.reduce((sum, row) => sum + row.thickness, 0) / thicknessData.length;
 const maxThickness = Math.max(...thicknessData.map((row) => row.thickness));
 const minThickness = Math.min(...thicknessData.map((row) => row.thickness));
@@ -198,35 +208,38 @@ const antigravityMenuGuide = [
 
 const promptExamples = [
   {
-    title: '1차 지시: 데이터와 화면 뼈대 만들기',
-    body: `CVD 증착 두께 데이터 120개를 React 배열로 생성해줘.
-컬럼은 lot, chamber, zone, time, thickness이고 thickness 단위는 micrometer야.
-화면에는 평균, min/max, spec out count, chamber별 요약 카드가 있어야 해.`,
+    title: '1차 지시: 웨이퍼 기반 데이터와 화면 뼈대 만들기',
+    body: `단일 wafer lot의 CVD 증착 두께 측정 데이터를 React 배열로 생성해줘.
+컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer야.
+waferPosition은 C, N, E, S, W, NE, SE, SW, NW로 두고, 화면에는 평균, min/max, spec out count, chamber별 요약 카드가 있어야 해.`,
   },
   {
-    title: '2차 지시: 공정 의미를 더하기',
-    body: `MES, Lot, Recipe, CVD, Uniformity, Spec Limit 용어에 물결 밑줄을 넣고 hover 주석을 달아줘.
-수강생이 공정 용어를 모르는 상태에서도 데이터가 어떤 업무 의미인지 이해하게 만들어줘.`,
+    title: '2차 지시: 웨이퍼 공정 의미를 더하기',
+    body: `MES, Lot, Wafer ID, Recipe, CVD, Deposition Time, Wafer Position, Uniformity, Spec Limit 용어에 hover 주석을 달아줘.
+수강생이 wafer 내 center-edge 균일도와 시간별 박막 성장률이 어떤 업무 의미인지 이해하게 만들어줘.`,
   },
   {
-    title: '3차 지시: 엑셀로 어려운 시각화 만들기',
+    title: '3차 지시: 웨이퍼 단면과 위치별 시각화 만들기',
     body: `Excel 기본 차트처럼 막대/꺾은선만 쓰지 말고,
-wafer-zone heat strip, spec band timeline, chamber drift map, anomaly ribbon을 추가해줘.
-각 시각화 아래에는 “이 차트로 무엇을 판단하는지” 한 문장 설명을 붙여줘.`,
+wafer cross-section film growth animation, wafer position heatmap, spec band timeline, chamber drift map을 추가해줘.
+각 시각화 아래에는 center-edge uniformity, deposition rate, drift 의심 여부를 판단하는 문장을 붙여줘.`,
   },
   {
-    title: '4차 지시: 검증과 수정',
-    body: `npm run build를 실행해서 오류를 고쳐줘.
-모바일 화면에서 Antigravity 튜토리얼 영역이 겹치지 않게 반응형 CSS를 조정해줘.
-용어 툴팁이 카드 밖으로 너무 크게 튀어나오지 않게 해줘.`,
+    title: '4차 지시: pseudo-prompt로 동적 히트맵 추가',
+    body: `Pseudo-prompt:
+Given wafer positions [C,N,E,S,W,NE,SE,SW,NW] and deposition time slices [0,8,16,24,32,40] minutes,
+calculate thicknessMicrometer for each position and time.
+Render an animated wafer heatmap where each frame shows thickness distribution across the wafer.
+Use cooler colors for thin film, warmer colors for thick film, and highlight late-time NE/E/SE thickening as a possible showerhead or gas-flow non-uniformity.
+Add a time scrubber or auto-play animation, then run npm run build and fix layout issues.`,
   },
 ];
 
 const promptChecklist = [
-  '공정 배경: CVD 증착 두께를 왜 보는지 설명했는가?',
-  '데이터 구조: 컬럼명, 단위, 샘플 수, spec 기준을 명시했는가?',
-  '분석 기준: 평균, 범위, uniformity, drift, spec out을 구분했는가?',
-  '시각화 요구: 엑셀 기본 차트와 다른 표현 방식을 지정했는가?',
+  '공정 배경: 웨이퍼 CVD 증착 두께와 박막 균일도를 왜 보는지 설명했는가?',
+  '데이터 구조: waferId, position, radius, deposition time, 단위, spec 기준을 명시했는가?',
+  '분석 기준: 평균, 범위, center-edge uniformity, deposition rate, drift, spec out을 구분했는가?',
+  '시각화 요구: 웨이퍼 단면 성장, 위치별 히트맵, 시간별 변화처럼 엑셀 기본 차트와 다른 표현을 지정했는가?',
   '검증 조건: build, 모바일, 용어 주석, 차트 설명까지 확인시켰는가?',
 ];
 
@@ -325,32 +338,45 @@ const presentationSlides = [
   },
 ];
 
-const promptText = `역할: 당신은 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
-입력: 120개 이상의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, chamber, zone, time, thickness입니다.
-작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) zone별 uniformity 4) 시간 흐름에 따른 이상 패턴을 시각화하세요.
-시각화: Excel 기본 차트로 보기 어려운 wafer-zone heat strip, chamber drift map, spec band timeline, anomaly ribbon을 포함하세요.
-결과: 강의용 React 대시보드로 만들고 MES, Lot, Recipe, Uniformity 같은 용어에는 주석형 설명을 붙이세요.`;
+const promptText = `역할: 당신은 웨이퍼 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
+입력: 단일 wafer lot 기준의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer입니다.
+작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) wafer center-edge uniformity 4) 증착 시간에 따른 위치별 박막 성장 패턴을 시각화하세요.
+시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, chamber drift map, spec band timeline을 포함하세요.
+결과: 강의용 React 대시보드로 만들고 MES, Lot, Wafer ID, Recipe, Deposition Time, Uniformity 같은 용어에는 주석형 설명을 붙이세요.`;
 
 function CvdAnimation() {
   return (
     <div className="cvd-animation">
       <div className="chamber">
-        <div className="wafer" />
+        <div className="gas-inlet">precursor gas</div>
+        <div className="reaction-zone">
+          {Array.from({ length: 18 }, (_, index) => (
+            <motion.span
+              key={index}
+              className={index % 3 === 0 ? 'reactive radical' : 'reactive'}
+              animate={{ y: [0, 132], x: [0, index % 2 === 0 ? 10 : -10], opacity: [0, 0.95, 0] }}
+              transition={{ duration: 2.7, repeat: Infinity, delay: index * 0.14, ease: 'easeInOut' }}
+              style={{ left: `${12 + (index % 9) * 9}%` }}
+            />
+          ))}
+        </div>
         <motion.div
-          className="gas gas-a"
-          animate={{ y: [0, 112], opacity: [0, 1, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+          className="film cross-section-film"
+          animate={{ height: [7, 34, 7] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="gas gas-b"
-          animate={{ y: [0, 104], opacity: [0, 1, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, delay: 0.35, ease: 'easeInOut' }}
+          className="film-highlight"
+          animate={{ opacity: [0.45, 0.9, 0.45], scaleX: [0.88, 1, 0.88] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div
-          className="film"
-          animate={{ height: [4, 22, 4] }}
-          transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <div className="wafer cross-section-wafer">
+          <span>Si wafer cross-section</span>
+        </div>
+        <div className="thickness-gauge">
+          <span>thin film grows</span>
+          <motion.i animate={{ height: [16, 82, 16] }} transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }} />
+        </div>
       </div>
       <div className="cvd-steps">
         {cvdSteps.map((step, index) => (
@@ -365,6 +391,46 @@ function CvdAnimation() {
             <p>{step.detail}</p>
           </motion.div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function TimeResolvedWaferHeatmap() {
+  const min = Math.min(...depositionTimeSlices.flat().map((point) => point.thickness));
+  const max = Math.max(...depositionTimeSlices.flat().map((point) => point.thickness));
+
+  return (
+    <div className="time-wafer-heatmap">
+      <div className="heatmap-frames">
+        {depositionTimeSlices.map((slice, timeIndex) => (
+          <motion.div
+            className="heatmap-frame"
+            key={timeIndex}
+            animate={{ opacity: [0.25, 1, 0.25], scale: [0.96, 1.02, 0.96] }}
+            transition={{ duration: 8.4, repeat: Infinity, delay: timeIndex * 1.4 }}
+          >
+            <span className="frame-time">T+{timeIndex * 8}m</span>
+            <div className="mini-wafer-map">
+              {slice.map((point) => {
+                const hot = (point.thickness - min) / (max - min);
+                return (
+                  <i
+                    key={point.position}
+                    className={`pos-${point.position.toLowerCase()}`}
+                    style={{ backgroundColor: `rgb(${55 + hot * 195}, ${190 - hot * 105}, ${210 - hot * 170})` }}
+                    title={`${point.position}: ${point.thickness} micrometer`}
+                  />
+                );
+              })}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="heatmap-legend">
+        <span>thin</span>
+        <i />
+        <strong>thick</strong>
       </div>
     </div>
   );
@@ -581,9 +647,9 @@ export default function App() {
         <span className="section-label">03. CVD 공정</span>
         <h2><Layers3 size={24} /> CVD 증착은 <mark>시간 흐름</mark>에 따라 데이터가 쌓입니다</h2>
         <p className="section-intro">
-          <Term note="Chemical Vapor Deposition. 화학 반응으로 표면에 박막을 쌓는 증착 공정입니다.">CVD</Term>는 기판 투입부터 진공,
-          가열, 가스 주입, 증착, purge, 측정으로 이어집니다. 이때 <Term note="설비 조건 묶음. 온도, 압력, 가스 유량, 시간 등을 포함합니다.">Recipe</Term>,
-          챔버, 시간, 측정 두께가 모두 데이터가 됩니다.
+          <Term note="Chemical Vapor Deposition. 화학 반응으로 표면에 박막을 쌓는 증착 공정입니다.">CVD</Term>는 웨이퍼 투입부터 진공,
+          가열, 반응 가스 주입, 표면 반응, 박막 성장, purge, 위치별 두께 측정으로 이어집니다. 이때
+          <Term note="설비 조건 묶음. 온도, 압력, 가스 유량, 시간 등을 포함합니다."> Recipe</Term>, 챔버, 증착 시간, 웨이퍼 내 위치별 두께가 모두 데이터가 됩니다.
         </p>
         <CvdAnimation />
       </section>
@@ -832,6 +898,11 @@ export default function App() {
               <h3><Gauge size={18} /> Zone uniformity delta</h3>
               <ZoneUniformity />
               <p>Center, Middle, Edge 위치별 평균 차이로 막 균일도 문제를 빠르게 봅니다.</p>
+            </div>
+            <div className="viz-card large">
+              <h3><Layers3 size={18} /> Time-resolved wafer heatmap</h3>
+              <TimeResolvedWaferHeatmap />
+              <p>증착 시간이 늘어날수록 웨이퍼 내 위치별 두께 분포가 어떻게 변하는지 동적으로 비교합니다.</p>
             </div>
             <div className="viz-card">
               <h3><Search size={18} /> Risk lot ranking</h3>
