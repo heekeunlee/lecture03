@@ -106,27 +106,90 @@ const ideCards = [
     icon: Code2,
     best: '코드 파일을 직접 수정하며 AI와 짝 프로그래밍하기 좋습니다.',
     use: '이미 프로젝트 구조가 있고, 컴포넌트나 함수 단위로 빠르게 고칠 때 적합합니다.',
+    strengths: ['파일 단위 수정이 빠름', '기존 코드 읽기와 부분 리팩터링에 강함', '프론트엔드 컴포넌트 수정 지시가 편함'],
+    cautions: ['업무 목표를 너무 크게 주면 중간 확인 없이 엉뚱한 방향으로 갈 수 있음', '데이터 분석 의도를 사용자가 더 자주 쪼개줘야 함'],
+    example: '“src/App.tsx의 CVD 두께 차트에 spec 상한/하한 라인을 추가하고, 이탈 포인트만 빨간색으로 표시해줘.”',
   },
   {
     name: 'Antigravity',
     icon: Bot,
     best: '작업 목표를 주면 여러 파일을 탐색하고 계획, 구현, 검증까지 이어가는 에이전트형 IDE입니다.',
     use: '이번 강의처럼 데이터셋, 화면, 분석 로직, 대시보드를 한 번에 만들 때 사용합니다.',
+    strengths: ['프로젝트 전체 맥락을 읽고 계획을 세움', '여러 파일을 함께 수정하는 앱 제작 실습에 적합', '실행 결과와 오류를 바탕으로 다음 수정을 이어가기 좋음'],
+    cautions: ['처음 목표가 모호하면 보기 좋은 화면만 만들고 공정 의미를 놓칠 수 있음', 'MES 용어와 판정 기준은 엔지니어가 반드시 제공해야 함'],
+    example: '“CVD 두께 데이터 120개를 만들고, chamber drift와 zone uniformity를 보여주는 React 대시보드를 구현해줘.”',
   },
   {
     name: 'VS Code + Copilot',
     icon: GitBranch,
     best: '기존 개발 환경에 AI 자동완성을 붙이는 방식입니다.',
     use: '팀 표준 개발 환경을 유지하면서 반복 코드 작성 속도를 높일 때 적합합니다.',
+    strengths: ['팀에서 쓰던 확장, 터미널, Git 흐름을 유지', '작은 함수 작성과 테스트 코드 보강이 빠름', '보안 정책상 표준 IDE만 써야 할 때 현실적'],
+    cautions: ['대시보드 전체 설계는 사용자가 더 많이 끌고 가야 함', '초보자에게는 파일 구조와 실행 명령을 따로 설명해야 함'],
+    example: '“thickness 배열을 chamber별로 groupBy하고 평균, 표준편차, spec out count를 반환하는 함수를 작성해줘.”',
   },
 ];
 
 const antigravitySteps = [
-  { target: 'download', title: '설치 파일 받기', body: '공식 배포 페이지에서 운영체제에 맞는 설치 파일을 내려받고 실행합니다.', x: 18, y: 18 },
-  { target: 'explorer', title: '프로젝트 폴더 열기', body: '좌측 Explorer에서 lecture03 폴더를 열어 src, public, package.json 구조를 확인합니다.', x: 14, y: 44 },
-  { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 지시합니다.', x: 78, y: 26 },
-  { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다.', x: 46, y: 84 },
-  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명이 충분한지 확인하고 수정시킵니다.', x: 55, y: 48 },
+  { target: 'download', title: '설치 파일 받기', body: '공식 배포 페이지에서 운영체제에 맞는 설치 파일을 내려받고 실행합니다. 회사 PC라면 보안 정책상 설치 권한, 프록시, GitHub 접속 가능 여부를 먼저 확인합니다.', x: 18, y: 18 },
+  { target: 'account', title: '로그인과 기본 설정', body: '계정 로그인 후 모델, 테마, 터미널 기본 shell, Git 연동 상태를 확인합니다. 강의에서는 “AI가 파일을 수정하고 실행 결과를 확인하는 흐름”을 보여주기 위해 Agent 권한을 사용합니다.', x: 82, y: 16 },
+  { target: 'explorer', title: '프로젝트 폴더 열기', body: '좌측 Explorer에서 lecture03 폴더를 열어 src, public, package.json 구조를 확인합니다. 수강생에게 “App.tsx는 화면, index.css는 디자인, package.json은 실행 명령”이라고 설명합니다.', x: 14, y: 44 },
+  { target: 'context', title: '데이터와 요구사항 붙이기', body: 'CVD 두께 데이터 컬럼, spec 기준, MES 용어 설명을 Agent에게 먼저 제공합니다. 이 단계가 빠지면 AI는 일반적인 차트만 만들고 공정 의미를 놓칩니다.', x: 66, y: 38 },
+  { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 말하되, 결과물 형식과 검증 조건까지 함께 적습니다.', x: 78, y: 26 },
+  { target: 'plan', title: '계획 확인 후 승인', body: 'AI가 제안한 작업 계획에서 데이터 생성, 요약 지표, 시각화, 반응형 화면, 빌드 검증이 포함됐는지 확인합니다. 빠진 항목은 구현 전에 바로 추가 지시합니다.', x: 79, y: 48 },
+  { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다. 오류 메시지는 요약하지 말고 원문 그대로 붙이는 편이 좋습니다.', x: 46, y: 84 },
+  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명, 모바일 폭을 확인합니다. “보기 좋게”보다 “CVD-03 drift가 더 선명하게 보이게”처럼 구체적으로 말합니다.', x: 55, y: 48 },
+  { target: 'commit', title: '커밋과 배포', body: '완성 후 git status로 변경 파일을 확인하고, 커밋 메시지를 작성한 뒤 GitHub Pages에 배포합니다. 강의에서는 결과 URL을 열어 수강생에게 완성물을 보여줍니다.', x: 44, y: 16 },
+];
+
+const ideDecisionRows = [
+  { situation: '파일 하나의 차트 색상이나 문구를 바꾸는 경우', choice: 'Cursor', reason: '작은 코드 변경과 즉시 수정이 빠릅니다.' },
+  { situation: '데이터셋, 계산 로직, 화면, 스타일을 한 번에 만드는 경우', choice: 'Antigravity', reason: '프로젝트 전체 계획을 세우고 여러 파일을 함께 다루기 좋습니다.' },
+  { situation: '회사 표준 VS Code 환경을 그대로 써야 하는 경우', choice: 'VS Code + Copilot', reason: '기존 확장과 보안 정책을 유지하면서 AI 도움을 받을 수 있습니다.' },
+  { situation: '초보 수강생에게 “AI가 앱을 만들어가는 과정”을 보여주는 경우', choice: 'Antigravity', reason: 'Agent 계획, 파일 수정, 터미널 실행, 미리보기 흐름이 강의에 적합합니다.' },
+];
+
+const antigravityMenuGuide = [
+  { menu: 'Explorer', job: '파일 구조 확인', example: 'src/App.tsx, src/index.css, package.json을 찾아 “어느 파일이 무엇을 담당하는지” 설명합니다.' },
+  { menu: 'Agent / Chat', job: '작업 목표 입력', example: 'CVD 데이터셋 생성, MES 용어 주석, 대시보드 시각화 요구사항을 한 번에 전달합니다.' },
+  { menu: 'Editor', job: '코드 확인', example: 'AI가 만든 thicknessData, CvdAnimation, dashboard 컴포넌트가 실제로 들어갔는지 확인합니다.' },
+  { menu: 'Terminal', job: '실행 검증', example: 'npm run dev로 화면을 띄우고 npm run build로 배포 가능한지 확인합니다.' },
+  { menu: 'Preview', job: '사용자 화면 점검', example: '섹션 간격, 화살표 애니메이션, 모바일 줄바꿈, 툴팁 위치를 확인합니다.' },
+  { menu: 'Source Control', job: '변경 이력 관리', example: '수정 파일을 확인하고 “Refine CVD dashboard lesson”처럼 의미 있는 메시지로 커밋합니다.' },
+];
+
+const promptExamples = [
+  {
+    title: '1차 지시: 데이터와 화면 뼈대 만들기',
+    body: `CVD 증착 두께 데이터 120개를 React 배열로 생성해줘.
+컬럼은 lot, chamber, zone, time, thickness이고 thickness 단위는 micrometer야.
+화면에는 평균, min/max, spec out count, chamber별 요약 카드가 있어야 해.`,
+  },
+  {
+    title: '2차 지시: 공정 의미를 더하기',
+    body: `MES, Lot, Recipe, CVD, Uniformity, Spec Limit 용어에 물결 밑줄을 넣고 hover 주석을 달아줘.
+수강생이 공정 용어를 모르는 상태에서도 데이터가 어떤 업무 의미인지 이해하게 만들어줘.`,
+  },
+  {
+    title: '3차 지시: 엑셀로 어려운 시각화 만들기',
+    body: `Excel 기본 차트처럼 막대/꺾은선만 쓰지 말고,
+wafer-zone heat strip, spec band timeline, chamber drift map, anomaly ribbon을 추가해줘.
+각 시각화 아래에는 “이 차트로 무엇을 판단하는지” 한 문장 설명을 붙여줘.`,
+  },
+  {
+    title: '4차 지시: 검증과 수정',
+    body: `npm run build를 실행해서 오류를 고쳐줘.
+모바일 화면에서 Antigravity 튜토리얼 영역이 겹치지 않게 반응형 CSS를 조정해줘.
+용어 툴팁이 카드 밖으로 너무 크게 튀어나오지 않게 해줘.`,
+  },
+];
+
+const promptChecklist = [
+  '공정 배경: CVD 증착 두께를 왜 보는지 설명했는가?',
+  '데이터 구조: 컬럼명, 단위, 샘플 수, spec 기준을 명시했는가?',
+  '분석 기준: 평균, 범위, uniformity, drift, spec out을 구분했는가?',
+  '시각화 요구: 엑셀 기본 차트와 다른 표현 방식을 지정했는가?',
+  '검증 조건: build, 모바일, 용어 주석, 차트 설명까지 확인시켰는가?',
 ];
 
 const excelPain = [
@@ -356,6 +419,10 @@ export default function App() {
       <section>
         <span className="section-label">06. AI IDE 선택</span>
         <h2><Monitor size={24} /> 바이브 코딩은 <mark>AI IDE</mark>에서 일이 됩니다</h2>
+        <p className="section-intro">
+          일반 코드 편집기는 “내가 코드를 알고 직접 고치는 도구”에 가깝습니다. AI IDE는 “현장 문제를 설명하면 코드, 데이터, 화면,
+          실행 검증까지 함께 진행하는 작업 공간”입니다. 3강에서는 엑셀 파일을 만지는 법보다, 공정 데이터를 앱 요구사항으로 바꾸는 법을 먼저 봅니다.
+        </p>
         <div className="ide-grid">
           {ideCards.map((ide) => (
             <div className="ide-card" key={ide.name}>
@@ -363,6 +430,28 @@ export default function App() {
               <h3>{ide.name}</h3>
               <p>{ide.best}</p>
               <b>{ide.use}</b>
+              <div className="ide-detail">
+                <span>강점</span>
+                <ul>{ide.strengths.map((item) => <li key={item}>{item}</li>)}</ul>
+              </div>
+              <div className="ide-detail">
+                <span>주의점</span>
+                <ul>{ide.cautions.map((item) => <li key={item}>{item}</li>)}</ul>
+              </div>
+              <div className="ide-example">
+                <strong>CVD 실습 지시 예시</strong>
+                <p>{ide.example}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="decision-table">
+          <h3>강의 중 선택 기준</h3>
+          {ideDecisionRows.map((row) => (
+            <div className="decision-row" key={row.situation}>
+              <span>{row.situation}</span>
+              <strong>{row.choice}</strong>
+              <p>{row.reason}</p>
             </div>
           ))}
         </div>
@@ -392,11 +481,11 @@ export default function App() {
               </div>
               <div className="terminal"><TerminalSquare size={16} /> npm run dev</div>
             </main>
-            <section className="agent-panel">
+            <div className="agent-panel">
               <b>Agent</b>
               <p>데이터셋을 읽고 CVD 두께 대시보드를 만들어줘.</p>
               <button><Wand2 size={15} /> Run</button>
-            </section>
+            </div>
             {antigravitySteps.map((step, index) => (
               <motion.div
                 className="pointer-callout"
@@ -422,14 +511,61 @@ export default function App() {
             ))}
           </div>
         </div>
+        <div className="menu-guide">
+          <h3>메뉴별로 수강생에게 설명할 포인트</h3>
+          <div className="menu-grid">
+            {antigravityMenuGuide.map((item) => (
+              <div className="menu-card" key={item.menu}>
+                <strong>{item.menu}</strong>
+                <span>{item.job}</span>
+                <p>{item.example}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="lecture-script">
+          <h3>강사용 진행 멘트 예시</h3>
+          <p>
+            “지금부터는 엑셀을 열지 않고, 공정 엔지니어가 AI에게 업무를 넘기는 장면을 보겠습니다. 왼쪽은 파일 구조, 가운데는 실제 코드와 미리보기,
+            오른쪽은 Agent에게 지시하는 공간입니다. 중요한 것은 코드를 외우는 것이 아니라, CVD 두께 데이터의 의미와 보고서 판단 기준을 AI에게 정확히 넘기는 것입니다.”
+          </p>
+          <p>
+            “첫 지시는 크게 줘도 됩니다. 다만 바로 끝내려고 하지 말고, AI가 만든 계획을 보고 누락된 기준을 추가합니다. 예를 들어 spec이 2.35-2.75 micrometer라는 말이 빠지면,
+            AI는 보기 좋은 차트만 만들고 공정 이상 판단은 하지 못합니다.”
+          </p>
+        </div>
       </section>
 
       <section>
         <span className="section-label">08. 바이브 코딩 지시문</span>
         <h2><Sparkles size={24} /> 데이터셋을 <mark>대시보드 요구사항</mark>으로 바꿉니다</h2>
+        <p className="section-intro">
+          좋은 지시문은 한 번에 완벽한 문장이 아니라, “초안 생성 → 공정 의미 보강 → 고급 시각화 추가 → 검증”으로 이어지는 작업 흐름입니다.
+          아래 예시는 Antigravity Agent에게 순서대로 넣을 수 있는 실전 지시문입니다.
+        </p>
         <div className="prompt-card engineering wide">
           <span>Antigravity Agent Prompt</span>
           <div className="prompt-box">{promptText}</div>
+        </div>
+        <div className="prompt-ladder">
+          {promptExamples.map((prompt, index) => (
+            <div className="prompt-step" key={prompt.title}>
+              <strong>{index + 1}</strong>
+              <div>
+                <h3>{prompt.title}</h3>
+                <pre>{prompt.body}</pre>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="prompt-checklist">
+          <h3>지시문 품질 체크리스트</h3>
+          {promptChecklist.map((item) => (
+            <div className="check-row" key={item}>
+              <Sparkles size={16} />
+              <span>{item}</span>
+            </div>
+          ))}
         </div>
       </section>
 
