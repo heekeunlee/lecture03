@@ -286,72 +286,84 @@ const engineerReportPoints = [
   },
 ];
 
-const pptPrompt = `당신은 반도체/디스플레이 CVD 공정 엔지니어의 생산 회의 발표자료를 만드는 데이터 분석 PM입니다.
+const pptPrompt = `당신은 반도체 CVD 공정 엔지니어의 생산 회의 발표자료를 만드는 데이터 분석 PM입니다.
 
 목표:
-- CVD 증착 두께 120개 측정 데이터에서 정상 상태와 문제 상태를 비교해 3페이지 PPT 보고서를 작성하세요.
-- 청중은 공정팀장, 품질팀, 설비 담당자입니다. 숫자와 그림을 보고 3분 안에 의사결정할 수 있어야 합니다.
+- 가상의 반도체 프로젝트 "Aurora Edge AI Sensor"의 CVD SiN 박막 두께 uniformity 개선 보고서 3페이지를 작성하세요.
+- 청중은 공정팀장, 소자개발, 품질팀, 설비 담당자입니다. 비전공자도 프로젝트 목표, 현재 평가 결과, 개선 방향을 이해해야 합니다.
 
 데이터 조건:
 - thickness 단위는 micrometer입니다.
 - 목표 두께는 2.50 micrometer입니다.
 - 관리 기준은 LSL 2.35, USL 2.75 micrometer입니다.
-- 컬럼은 lot, chamber, zone, time, thickness입니다.
-- 주요 이상 후보는 CVD-03 후반부 thickness drift입니다.
+- 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer입니다.
+- 주요 이상 후보는 증착 시간이 길어질수록 wafer edge가 center보다 두꺼워지는 edge-high non-uniformity입니다.
 
 슬라이드 구성:
-1페이지: Executive Summary
-- 정상 상태와 현재 진단 상태를 좌우 비교하세요.
-- 정상 상태는 전체 평균이 목표 근처이고 spec 이탈이 없는 상태로 표현하세요.
-- 문제 상태는 CVD-03 후반부 drift, spec out, risk lot을 빨간색으로 강조하세요.
-- 최종 메시지는 “CVD-03 late run drift 의심, 즉시 설비 로그 대조 필요”로 작성하세요.
+1페이지: Project Goal & Evaluation Status
+- Aurora Edge AI Sensor 프로젝트의 특성 개선 목표를 창작하세요.
+- 목표 예시는 dark current 감소, pixel-to-pixel sensitivity 균일도 개선, leakage 안정화입니다.
+- 이 목표를 달성하려면 CVD SiN passivation 막의 두께 uniformity 확보가 왜 중요한지 설명하세요.
+- 현재 실행 중인 평가 항목: wafer 위치별 두께 측정, center-edge delta, stress/warpage 측정, 전기 특성 correlation을 공유하세요.
 
-2페이지: Diagnosis & Evidence
-- spec band timeline, wafer surface map, chamber drift map, zone uniformity delta를 근거로 제시하세요.
-- 각 시각화 아래에 엔지니어 판단 문장을 1개씩 붙이세요.
-- 두께 상승, edge 편차, 후반 drift가 서로 연결될 가능성을 설명하세요.
+2페이지: Time-resolved Uniformity Change
+- 증착 시간이 길어질수록 wafer 위치별 두께 uniformity가 변한다는 진단을 보여주세요.
+- 시간에 따른 wafer heatmap 변화를 넣고, edge ring 영역이 center보다 두꺼워지는 현상을 강조하세요.
+- 이 현상이 후속 lithography focus margin, etch uniformity, CD variation, contact resistance, passivation stress crack에 어떤 영향을 줄 수 있는지 설명하세요.
 
-3페이지: Prescription, Schedule, Next Plan
-- 처방: CVD-03 chamber pressure, gas flow, temperature stabilization, recipe change 이력 확인
-- 일정: Day 0 hold/re-measure, Day 1 설비 로그 분석, Day 2 조건 재현 테스트, Day 3 품질 회의 보고
-- 향후계획: MES 데이터 자동 연동, SPC 알림, weekly dashboard 운영
-- 마지막 줄에는 의사결정 요청사항을 명확히 쓰세요.`;
+3페이지: Root Cause, Prioritization & Improvement Plan
+- 예상 원인을 온도 분포, wafer bow/warpage, film stress, showerhead gas distribution, chuck contact, pressure 안정화, recipe ramp 조건으로 나누세요.
+- fishbone diagram으로 원인 후보를 분류하고, Pareto chart로 영향도가 큰 인자를 가중치 순서로 보여주세요.
+- 결론은 "film stress로 인한 wafer bow가 center-edge 막두께 차이를 키운다"로 정리하세요.
+- 개선 일정표에는 stress split run, temperature map 확인, low-stress recipe 조건 DOE, 재측정, 품질 회의 보고를 넣으세요.`;
 
 const presentationSlides = [
   {
     page: '01',
-    title: 'Executive Summary',
-    subtitle: 'CVD-03 late run drift 의심',
-    diagnosis: '전체 평균은 목표 근처이나 CVD-03 후반부에서 두께 상승과 spec out이 집중됩니다.',
-    normal: ['평균 2.50 micrometer 근처', 'Spec out 0 point', 'Chamber별 drift 안정', 'Zone 편차 낮음'],
-    issue: ['CVD-03 후반부 + drift', `Spec out ${outliers.length} points`, 'Risk Lot 재측정 필요', '설비 로그 대조 필요'],
-    action: 'CVD-03 관련 Lot hold 및 chamber pressure / gas flow / temperature 로그 즉시 확인',
+    visual: 'project',
+    title: 'Project Goal & Evaluation Status',
+    subtitle: 'Aurora Edge AI Sensor · CVD SiN uniformity 확보',
+    diagnosis: 'Aurora Edge AI Sensor는 저조도 이미지 센서의 dark current를 18% 낮추고 pixel-to-pixel sensitivity 편차를 줄이는 가상 프로젝트입니다. 이를 위해 CVD SiN passivation 막이 wafer 전 영역에서 균일해야 합니다.',
+    normalTitle: '개선 목표',
+    issueTitle: '진행 평가',
+    actionTitle: '공유 메시지',
+    normal: ['Dark current -18%', 'Sensitivity uniformity +12%', 'Leakage fail rate < 0.8%', 'CVD SiN target 2.50 micrometer'],
+    issue: ['9-point wafer thickness map', 'Center-edge delta 관리', 'Film stress / wafer bow 측정', '전기 특성과 두께 correlation'],
+    action: '두께 uniformity는 단순 공정 지표가 아니라 후속 소자 특성, 수율, 신뢰성까지 연결되는 핵심 관리 항목입니다.',
   },
   {
     page: '02',
-    title: 'Diagnosis & Evidence',
-    subtitle: '시각화 결과로 이상 후보를 좁힘',
-    diagnosis: 'Spec band timeline과 wafer surface map에서 후반부 고두께 영역이 반복적으로 나타납니다.',
-    normal: ['정상: 점들이 spec band 중앙에 분포', '정상: wafer zone 색상 균일', '정상: chamber drift bar 짧음'],
-    issue: ['문제: CVD-03 drift bar가 가장 큼', '문제: edge/center delta 확인 필요', '문제: lot range 상위 묶음 재측정'],
-    action: 'Recipe step별 안정화 시간, chamber seasoning, showerhead 균일도, 계측기 보정 이력 교차 확인',
+    visual: 'heatmap',
+    title: 'Time-resolved Uniformity Change',
+    subtitle: '증착 시간이 길어질수록 edge ring이 두꺼워지는 패턴',
+    diagnosis: '시간별 wafer heatmap에서 증착 후반으로 갈수록 가장자리 ring 영역의 색이 더 진해집니다. 이는 center보다 edge 박막이 두꺼워지는 edge-high non-uniformity 후보입니다.',
+    normalTitle: '관찰 결과',
+    issueTitle: '후속 영향',
+    actionTitle: '품질 리스크',
+    normal: ['T+0~16m: 위치별 색 차이 작음', 'T+24m 이후 edge 색상 상승', 'NE/E/SE 방향 thickening 반복', 'Center-edge delta 확대'],
+    issue: ['Lithography focus margin 감소', 'Etch 후 잔막/과식각 편차', 'CD variation 증가', 'Contact resistance 산포', 'Passivation stress crack 가능성'],
+    action: 'Edge가 지속적으로 두꺼우면 다음 공정에서 패턴 폭, 식각 깊이, 접촉 저항, 장기 신뢰성이 동시에 흔들릴 수 있습니다.',
   },
   {
     page: '03',
-    title: 'Prescription & Plan',
-    subtitle: '진단, 처방, 일정, 향후계획',
-    diagnosis: '단일 두께 이슈가 아니라 장비 상태, recipe 안정화, 계측 신뢰성을 함께 확인해야 합니다.',
-    normal: ['Day 0: 의심 Lot hold / 재측정', 'Day 1: CVD-03 로그 분석', 'Day 2: 조건 재현 테스트'],
-    issue: ['처방: pressure hunting 확인', '처방: gas flow MFC drift 확인', '처방: 온도 안정화 overshoot 확인'],
-    action: 'Day 3 품질 회의에서 release 여부 결정, 이후 MES-SPC 자동 알림 대시보드로 정례화',
+    visual: 'rootCause',
+    title: 'Root Cause & Improvement Plan',
+    subtitle: 'Fishbone + Pareto로 원인을 좁히고 개선 일정을 제시',
+    diagnosis: '원인 후보를 온도, 웨이퍼 휨, 막 스트레스, 가스 분포, chuck 접촉, 압력 안정화로 나눠 평가했습니다. Pareto 가중치 기준으로는 film stress와 wafer bow가 가장 큰 영향 인자로 판단됩니다.',
+    normalTitle: '예상 원인',
+    issueTitle: '가중치 결과',
+    actionTitle: '결론 및 개선 일정',
+    normal: ['Temperature radial gradient', 'Wafer bow / warpage', 'Film stress 누적', 'Showerhead gas distribution', 'Chuck contact 불균일', 'Recipe ramp 조건'],
+    issue: ['Film stress 34%', 'Wafer bow 26%', 'Temperature map 17%', 'Gas distribution 13%', '기타 10%'],
+    action: '결론: 막 스트레스로 인한 wafer bow가 center-edge 막두께 차이를 키운다. 개선은 stress split run, low-stress recipe DOE, warpage 재측정, 품질 회의 보고 순서로 진행합니다.',
   },
 ];
 
 const promptText = `역할: 당신은 웨이퍼 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
 입력: 단일 wafer lot 기준의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer입니다.
 작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) wafer center-edge uniformity 4) 증착 시간에 따른 위치별 박막 성장 패턴을 시각화하세요.
-시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, chamber drift map, spec band timeline을 포함하세요.
-결과: 강의용 React 대시보드로 만들고 MES, Lot, Wafer ID, Recipe, Deposition Time, Uniformity 같은 용어에는 주석형 설명을 붙이세요.`;
+시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, chamber drift map, fishbone diagram, Pareto chart를 포함하세요.
+결과: 강의용 React 대시보드와 3페이지 발표자료를 만드세요. 발표자료는 가상 반도체 프로젝트 목표, 시간별 edge-high uniformity 변화, film stress/wafer bow 원인 분석과 개선 일정을 포함해야 합니다.`;
 
 function CvdAnimation() {
   return (
@@ -573,6 +585,69 @@ function NormalProblemCompare() {
       </div>
     </div>
   );
+}
+
+function ProjectEvaluationVisual() {
+  return (
+    <div className="project-visual">
+      <div className="project-chip">
+        <strong>Aurora Edge AI Sensor</strong>
+        <span>CVD SiN passivation uniformity</span>
+      </div>
+      <div className="project-metrics">
+        <div><span>Dark current</span><strong>-18%</strong></div>
+        <div><span>Sensitivity</span><strong>+12%</strong></div>
+        <div><span>Leakage fail</span><strong>&lt;0.8%</strong></div>
+      </div>
+      <div className="project-wafer">
+        {['stress', 'thickness', 'bow', 'electrical'].map((item, index) => (
+          <span key={item} className={`eval-${index}`}>{item}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FishboneParetoPlan() {
+  const pareto = [
+    { label: 'Film stress', value: 34 },
+    { label: 'Wafer bow', value: 26 },
+    { label: 'Temp map', value: 17 },
+    { label: 'Gas flow', value: 13 },
+    { label: 'Etc.', value: 10 },
+  ];
+  const plan = ['D0: Lot hold / warpage 재측정', 'D1: stress split run', 'D2: low-stress recipe DOE', 'D3: thickness map 재평가', 'D4: 품질 회의 보고'];
+
+  return (
+    <div className="rootcause-visual">
+      <div className="fishbone">
+        <strong>Fishbone</strong>
+        {['Temperature', 'Wafer bow', 'Film stress', 'Gas distribution', 'Chuck contact', 'Recipe ramp'].map((item, index) => (
+          <span key={item} className={`bone bone-${index}`}>{item}</span>
+        ))}
+        <b>Edge-high thickness</b>
+      </div>
+      <div className="pareto-mini">
+        <strong>Pareto weighting</strong>
+        {pareto.map((item) => (
+          <div key={item.label}>
+            <span>{item.label}</span>
+            <i style={{ width: `${item.value * 2.45}%` }} />
+            <b>{item.value}%</b>
+          </div>
+        ))}
+      </div>
+      <div className="schedule-mini">
+        {plan.map((item) => <span key={item}>{item}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function SlideVisual({ type }: { type: string }) {
+  if (type === 'project') return <ProjectEvaluationVisual />;
+  if (type === 'heatmap') return <TimeResolvedWaferHeatmap />;
+  return <FishboneParetoPlan />;
 }
 
 export default function App() {
@@ -1000,23 +1075,23 @@ export default function App() {
                 </div>
                 <div className="slide-body">
                   <div className="slide-visual">
-                    <NormalProblemCompare />
+                    <SlideVisual type={slide.visual} />
                   </div>
                   <div className="slide-content">
-                    <strong>진단</strong>
+                    <strong>핵심 메시지</strong>
                     <p>{slide.diagnosis}</p>
                     <div className="slide-columns">
                       <div className="normal-box">
-                        <b>정상 기준</b>
+                        <b>{slide.normalTitle}</b>
                         {slide.normal.map((item) => <span key={item}>{item}</span>)}
                       </div>
                       <div className="problem-box">
-                        <b>문제 포인트</b>
+                        <b>{slide.issueTitle}</b>
                         {slide.issue.map((item) => <span key={item}>{item}</span>)}
                       </div>
                     </div>
                     <div className="action-box">
-                      <b>처방 · 일정 · 향후계획</b>
+                      <b>{slide.actionTitle}</b>
                       <p>{slide.action}</p>
                     </div>
                   </div>
