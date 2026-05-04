@@ -447,7 +447,6 @@ section h2 {
 
 .decision-table,
 .menu-guide,
-.lecture-script,
 .prompt-ladder,
 .prompt-checklist {
   margin-top: 1.5rem;
@@ -455,7 +454,6 @@ section h2 {
 
 .decision-table,
 .menu-guide,
-.lecture-script,
 .prompt-checklist {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -466,7 +464,6 @@ section h2 {
 
 .decision-table h3,
 .menu-guide h3,
-.lecture-script h3,
 .prompt-checklist h3 {
   margin-bottom: 1rem;
   font-size: 1.15rem;
@@ -841,17 +838,12 @@ section h2 {
   font-weight: 900;
 }
 
-.menu-card p,
-.lecture-script p {
+.menu-card p {
   color: var(--text-secondary);
   font-family: var(--font-content);
   font-size: 0.94rem;
   line-height: 1.6;
   word-break: keep-all;
-}
-
-.lecture-script p + p {
-  margin-top: 0.8rem;
 }
 
 .prompt-card.wide {
@@ -1177,6 +1169,277 @@ section h2 {
   word-break: keep-all;
 }
 
+.wow-card {
+  background:
+    radial-gradient(circle at 52% 42%, rgba(14, 165, 233, 0.16), transparent 32%),
+    radial-gradient(circle at 72% 66%, rgba(190, 18, 60, 0.13), transparent 28%),
+    #ffffff;
+}
+
+.wafer-surface {
+  position: relative;
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.96) 0 33%, rgba(226, 232, 240, 0.88) 34% 50%, transparent 51%),
+    linear-gradient(135deg, #020617, #1e293b);
+}
+
+.wafer-surface::before {
+  position: absolute;
+  inset: 42px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 58% 42%, rgba(254, 202, 202, 0.88), transparent 22%),
+    radial-gradient(circle at 44% 54%, rgba(147, 197, 253, 0.88), transparent 26%),
+    conic-gradient(from 20deg, rgba(14, 165, 233, 0.34), rgba(20, 184, 166, 0.42), rgba(190, 18, 60, 0.46), rgba(14, 165, 233, 0.34));
+  box-shadow: inset -22px -24px 36px rgba(15, 23, 42, 0.24), inset 20px 20px 30px rgba(255, 255, 255, 0.55);
+  content: "";
+  transform: rotateX(54deg) rotateZ(-18deg);
+}
+
+.surface-glow {
+  position: absolute;
+  right: 27%;
+  bottom: 31%;
+  z-index: 2;
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  background: rgba(190, 18, 60, 0.34);
+  filter: blur(9px);
+}
+
+.wafer-surface span {
+  position: absolute;
+  z-index: 3;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.wafer-surface span.hot {
+  width: 13px;
+  height: 13px;
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.2), 0 0 18px rgba(190, 18, 60, 0.55);
+}
+
+.wafer-surface b {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 4;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  padding: 0.45rem 0.7rem;
+  color: #ffffff;
+  font-size: 0.82rem;
+}
+
+.normal-problem {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.state-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 1rem;
+}
+
+.state-card > strong {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-weight: 900;
+}
+
+.state-card.normal > strong {
+  color: #0f766e;
+}
+
+.state-card.problem > strong {
+  color: var(--warning);
+}
+
+.state-wafer {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-bottom: 0.8rem;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.state-wafer span {
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: #bfdbfe;
+}
+
+.state-card.normal .state-wafer span {
+  background: #99f6e4;
+}
+
+.state-wafer span.bad {
+  background: #fb7185;
+  box-shadow: 0 0 0 2px rgba(190, 18, 60, 0.16);
+}
+
+.ppt-prompt-panel,
+.slide-deck {
+  margin-top: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 1.4rem;
+}
+
+.ppt-prompt-panel h3,
+.slide-deck h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.ppt-prompt-panel pre {
+  overflow-x: auto;
+  border-radius: 8px;
+  background: #0f172a;
+  padding: 1.1rem;
+  color: #e5e7eb;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.slide-page {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.slide-page + .slide-page {
+  margin-top: 1rem;
+}
+
+.slide-header {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 1rem;
+  align-items: center;
+  background: #111827;
+  padding: 1rem;
+  color: #ffffff;
+}
+
+.slide-header span {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.slide-header h4 {
+  font-size: 1.28rem;
+  font-weight: 900;
+}
+
+.slide-header p {
+  color: #cbd5e1;
+  font-family: var(--font-content);
+}
+
+.slide-body {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.slide-visual .normal-problem {
+  grid-template-columns: 1fr;
+}
+
+.slide-content > strong {
+  display: block;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.slide-content > p {
+  margin: 0.35rem 0 0.9rem;
+  color: var(--text-secondary);
+  font-family: var(--font-content);
+  font-weight: 800;
+  word-break: keep-all;
+}
+
+.slide-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.normal-box,
+.problem-box,
+.action-box {
+  display: grid;
+  gap: 0.45rem;
+  border-radius: 8px;
+  padding: 0.9rem;
+}
+
+.normal-box {
+  background: #ecfdf5;
+}
+
+.problem-box {
+  background: #fff1f2;
+}
+
+.normal-box b {
+  color: #0f766e;
+}
+
+.problem-box b {
+  color: var(--warning);
+}
+
+.normal-box span,
+.problem-box span {
+  color: var(--text-primary);
+  font-family: var(--font-content);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.action-box {
+  margin-top: 0.8rem;
+  background: #eff6ff;
+}
+
+.action-box b {
+  color: var(--accent);
+}
+
+.action-box p {
+  color: var(--text-secondary);
+  font-family: var(--font-content);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
 .column-row:last-child {
   border-bottom: 0;
 }
@@ -1470,7 +1733,10 @@ footer.philosophy-section p {
   .tutorial-board,
   .viz-grid,
   .report-grid,
-  .cause-matrix {
+  .cause-matrix,
+  .normal-problem,
+  .slide-body,
+  .slide-columns {
     grid-template-columns: 1fr;
   }
 

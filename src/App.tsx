@@ -264,6 +264,67 @@ const engineerReportPoints = [
   },
 ];
 
+const pptPrompt = `당신은 반도체/디스플레이 CVD 공정 엔지니어의 생산 회의 발표자료를 만드는 데이터 분석 PM입니다.
+
+목표:
+- CVD 증착 두께 120개 측정 데이터에서 정상 상태와 문제 상태를 비교해 3페이지 PPT 보고서를 작성하세요.
+- 청중은 공정팀장, 품질팀, 설비 담당자입니다. 숫자와 그림을 보고 3분 안에 의사결정할 수 있어야 합니다.
+
+데이터 조건:
+- thickness 단위는 micrometer입니다.
+- 목표 두께는 2.50 micrometer입니다.
+- 관리 기준은 LSL 2.35, USL 2.75 micrometer입니다.
+- 컬럼은 lot, chamber, zone, time, thickness입니다.
+- 주요 이상 후보는 CVD-03 후반부 thickness drift입니다.
+
+슬라이드 구성:
+1페이지: Executive Summary
+- 정상 상태와 현재 진단 상태를 좌우 비교하세요.
+- 정상 상태는 전체 평균이 목표 근처이고 spec 이탈이 없는 상태로 표현하세요.
+- 문제 상태는 CVD-03 후반부 drift, spec out, risk lot을 빨간색으로 강조하세요.
+- 최종 메시지는 “CVD-03 late run drift 의심, 즉시 설비 로그 대조 필요”로 작성하세요.
+
+2페이지: Diagnosis & Evidence
+- spec band timeline, wafer surface map, chamber drift map, zone uniformity delta를 근거로 제시하세요.
+- 각 시각화 아래에 엔지니어 판단 문장을 1개씩 붙이세요.
+- 두께 상승, edge 편차, 후반 drift가 서로 연결될 가능성을 설명하세요.
+
+3페이지: Prescription, Schedule, Next Plan
+- 처방: CVD-03 chamber pressure, gas flow, temperature stabilization, recipe change 이력 확인
+- 일정: Day 0 hold/re-measure, Day 1 설비 로그 분석, Day 2 조건 재현 테스트, Day 3 품질 회의 보고
+- 향후계획: MES 데이터 자동 연동, SPC 알림, weekly dashboard 운영
+- 마지막 줄에는 의사결정 요청사항을 명확히 쓰세요.`;
+
+const presentationSlides = [
+  {
+    page: '01',
+    title: 'Executive Summary',
+    subtitle: 'CVD-03 late run drift 의심',
+    diagnosis: '전체 평균은 목표 근처이나 CVD-03 후반부에서 두께 상승과 spec out이 집중됩니다.',
+    normal: ['평균 2.50 micrometer 근처', 'Spec out 0 point', 'Chamber별 drift 안정', 'Zone 편차 낮음'],
+    issue: ['CVD-03 후반부 + drift', `Spec out ${outliers.length} points`, 'Risk Lot 재측정 필요', '설비 로그 대조 필요'],
+    action: 'CVD-03 관련 Lot hold 및 chamber pressure / gas flow / temperature 로그 즉시 확인',
+  },
+  {
+    page: '02',
+    title: 'Diagnosis & Evidence',
+    subtitle: '시각화 결과로 이상 후보를 좁힘',
+    diagnosis: 'Spec band timeline과 wafer surface map에서 후반부 고두께 영역이 반복적으로 나타납니다.',
+    normal: ['정상: 점들이 spec band 중앙에 분포', '정상: wafer zone 색상 균일', '정상: chamber drift bar 짧음'],
+    issue: ['문제: CVD-03 drift bar가 가장 큼', '문제: edge/center delta 확인 필요', '문제: lot range 상위 묶음 재측정'],
+    action: 'Recipe step별 안정화 시간, chamber seasoning, showerhead 균일도, 계측기 보정 이력 교차 확인',
+  },
+  {
+    page: '03',
+    title: 'Prescription & Plan',
+    subtitle: '진단, 처방, 일정, 향후계획',
+    diagnosis: '단일 두께 이슈가 아니라 장비 상태, recipe 안정화, 계측 신뢰성을 함께 확인해야 합니다.',
+    normal: ['Day 0: 의심 Lot hold / 재측정', 'Day 1: CVD-03 로그 분석', 'Day 2: 조건 재현 테스트'],
+    issue: ['처방: pressure hunting 확인', '처방: gas flow MFC drift 확인', '처방: 온도 안정화 overshoot 확인'],
+    action: 'Day 3 품질 회의에서 release 여부 결정, 이후 MES-SPC 자동 알림 대시보드로 정례화',
+  },
+];
+
 const promptText = `역할: 당신은 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
 입력: 120개 이상의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, chamber, zone, time, thickness입니다.
 작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) chamber별 drift 3) zone별 uniformity 4) 시간 흐름에 따른 이상 패턴을 시각화하세요.
@@ -384,6 +445,57 @@ function RiskLotRanking() {
           <p>avg {lot.avg.toFixed(3)} · range {lot.range.toFixed(3)} · spec out {lot.specOut}</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+function WaferSurfaceMap() {
+  return (
+    <div className="wafer-surface">
+      <motion.div
+        className="surface-glow"
+        animate={{ opacity: [0.45, 0.85, 0.45], scale: [0.96, 1.04, 0.96] }}
+        transition={{ duration: 3.8, repeat: Infinity }}
+      />
+      {thicknessData.slice(0, 64).map((row, index) => {
+        const angle = index * 137.5;
+        const radius = 8 + (index % 8) * 10;
+        const hot = (row.thickness - minThickness) / (maxThickness - minThickness);
+        return (
+          <span
+            key={row.id}
+            className={row.chamber === 'CVD-03' && index > 36 ? 'hot' : ''}
+            style={{
+              left: `calc(50% + ${Math.cos(angle) * radius}px)`,
+              top: `calc(50% + ${Math.sin(angle) * radius}px)`,
+              backgroundColor: `rgb(${70 + hot * 180}, ${190 - hot * 110}, ${210 - hot * 160})`,
+            }}
+            title={`${row.chamber} ${row.zone} ${row.thickness} micrometer`}
+          />
+        );
+      })}
+      <b>3D-like wafer thickness surface</b>
+    </div>
+  );
+}
+
+function NormalProblemCompare() {
+  return (
+    <div className="normal-problem">
+      <div className="state-card normal">
+        <strong>정상 상태</strong>
+        <div className="state-wafer">
+          {Array.from({ length: 36 }, (_, index) => <span key={index} />)}
+        </div>
+        <p>두께 분포가 목표 중심에 모이고 chamber별 drift가 작습니다.</p>
+      </div>
+      <div className="state-card problem">
+        <strong>문제 진단 상태</strong>
+        <div className="state-wafer">
+          {Array.from({ length: 36 }, (_, index) => <span key={index} className={index > 22 || index % 11 === 0 ? 'bad' : ''} />)}
+        </div>
+        <p>CVD-03 후반부와 특정 zone에서 고두께 영역이 도드라집니다.</p>
+      </div>
     </div>
   );
 }
@@ -628,17 +740,6 @@ export default function App() {
             ))}
           </div>
         </div>
-        <div className="lecture-script">
-          <h3>강사용 진행 멘트 예시</h3>
-          <p>
-            “지금부터는 엑셀을 열지 않고, 공정 엔지니어가 AI에게 업무를 넘기는 장면을 보겠습니다. 왼쪽은 파일 구조, 가운데는 실제 코드와 미리보기,
-            오른쪽은 Agent에게 지시하는 공간입니다. 중요한 것은 코드를 외우는 것이 아니라, CVD 두께 데이터의 의미와 보고서 판단 기준을 AI에게 정확히 넘기는 것입니다.”
-          </p>
-          <p>
-            “첫 지시는 크게 줘도 됩니다. 다만 바로 끝내려고 하지 말고, AI가 만든 계획을 보고 누락된 기준을 추가합니다. 예를 들어 spec이 2.35-2.75 micrometer라는 말이 빠지면,
-            AI는 보기 좋은 차트만 만들고 공정 이상 판단은 하지 못합니다.”
-          </p>
-        </div>
       </section>
 
       <section>
@@ -747,6 +848,16 @@ export default function App() {
               </div>
               <p>시각화 결과를 공정 확인 항목으로 연결하는 힌트 테이블입니다.</p>
             </div>
+            <div className="viz-card large wow-card">
+              <h3><Sparkles size={18} /> 3D-like wafer surface map</h3>
+              <WaferSurfaceMap />
+              <p>숫자 표를 보지 않아도 두께가 높아지는 영역이 표면 열감처럼 보이도록 만든 시각화입니다.</p>
+            </div>
+            <div className="viz-card large">
+              <h3><Activity size={18} /> Normal vs Problem visual diagnosis</h3>
+              <NormalProblemCompare />
+              <p>정상 상태와 문제 상태를 나란히 두어 보고자가 “무엇이 달라졌는지” 즉시 설명할 수 있게 합니다.</p>
+            </div>
           </div>
           <div className="report-panel">
             <h3>엔지니어 최종 보고 포인트</h3>
@@ -758,6 +869,47 @@ export default function App() {
                 </div>
               ))}
             </div>
+          </div>
+          <div className="ppt-prompt-panel">
+            <h3>프리젠테이션 발표 보고서 생성 프롬프트</h3>
+            <pre>{pptPrompt}</pre>
+          </div>
+          <div className="slide-deck">
+            <h3>생성된 프리젠테이션용 보고서 예시 3페이지</h3>
+            {presentationSlides.map((slide) => (
+              <div className="slide-page" key={slide.page}>
+                <div className="slide-header">
+                  <span>PAGE {slide.page}</span>
+                  <div>
+                    <h4>{slide.title}</h4>
+                    <p>{slide.subtitle}</p>
+                  </div>
+                </div>
+                <div className="slide-body">
+                  <div className="slide-visual">
+                    <NormalProblemCompare />
+                  </div>
+                  <div className="slide-content">
+                    <strong>진단</strong>
+                    <p>{slide.diagnosis}</p>
+                    <div className="slide-columns">
+                      <div className="normal-box">
+                        <b>정상 기준</b>
+                        {slide.normal.map((item) => <span key={item}>{item}</span>)}
+                      </div>
+                      <div className="problem-box">
+                        <b>문제 포인트</b>
+                        {slide.issue.map((item) => <span key={item}>{item}</span>)}
+                      </div>
+                    </div>
+                    <div className="action-box">
+                      <b>처방 · 일정 · 향후계획</b>
+                      <p>{slide.action}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
