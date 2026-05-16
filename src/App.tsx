@@ -187,30 +187,35 @@ const antigravityMenuGuide = [
 
 const promptExamples = [
   {
-    title: '1차 지시: 웨이퍼 기반 데이터와 화면 뼈대 만들기',
+    title: '1차 프롬프트: 웨이퍼 기반 데이터와 화면 뼈대 만들기',
     body: `단일 wafer lot의 CVD 증착 두께 측정 데이터를 React 배열로 생성해줘.
+
 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer야.
+
 waferPosition은 C, N, E, S, W, NE, SE, SW, NW로 두고, 화면에는 평균, min/max, spec out count, chamber별 요약 카드가 있어야 해.`,
   },
   {
-    title: '2차 지시: 웨이퍼 공정 의미를 더하기',
+    title: '2차 프롬프트: 웨이퍼 공정 의미를 더하기',
     body: `MES, Lot, Wafer ID, Recipe, CVD, Deposition Time, Wafer Position, Uniformity, Spec Limit 용어에 hover 주석을 달아줘.
+
 수강생이 wafer 내 center-edge 균일도와 시간별 박막 성장률이 어떤 업무 의미인지 이해하게 만들어줘.`,
   },
   {
-    title: '3차 지시: 웨이퍼 단면과 위치별 시각화 만들기',
+    title: '3차 프롬프트: 웨이퍼 단면과 위치별 시각화 만들기',
     body: `Excel 기본 차트처럼 막대/꺾은선 중심으로 만들지 말고,
 wafer cross-section film growth, wafer position heatmap, thickness distribution curve, box plot, spec band timeline을 추가해줘.
+
 각 시각화 아래에는 edge-high, center-edge uniformity, spec out 여부를 판단하는 문장을 붙여줘.`,
   },
   {
-    title: '4차 지시: pseudo-prompt로 동적 히트맵 추가',
-    body: `Pseudo-prompt:
-Given wafer positions [C,N,E,S,W,NE,SE,SW,NW] and deposition time slices [0,8,16,24,32,40] minutes,
-calculate thicknessMicrometer for each position and time.
-Render an animated wafer heatmap where each frame shows thickness distribution across the wafer.
-Use cooler colors for thin film, warmer colors for thick film, and highlight late-time NE/E/SE thickening as a possible showerhead or gas-flow non-uniformity.
-Add a time scrubber or auto-play animation, then run npm run build and fix layout issues.`,
+    title: '4차 프롬프트: 동적 히트맵 추가',
+    body: `wafer 위치 [C, N, E, S, W, NE, SE, SW, NW]와 증착 시간 [0, 8, 16, 24, 32, 40]분을 기준으로 각 위치와 시간의 thicknessMicrometer를 계산해줘.
+
+각 프레임이 wafer 전체의 두께 분포를 보여주는 동적 wafer heatmap을 렌더링해줘.
+
+얇은 박막은 차가운 색, 두꺼운 박막은 따뜻한 색으로 표시하고, 후반 시간대에 NE/E/SE 영역이 두꺼워지는 현상은 showerhead 또는 gas-flow non-uniformity 가능성으로 강조해줘.
+
+시간 scrubber 또는 auto-play 애니메이션을 추가한 뒤, npm run build를 실행하고 레이아웃 문제를 수정해줘.`,
   },
 ];
 
@@ -330,9 +335,13 @@ const presentationSlides = [
 ];
 
 const promptText = `역할: 당신은 웨이퍼 CVD 공정 데이터 분석 대시보드를 만드는 제조 데이터 엔지니어입니다.
+
 입력: 단일 wafer lot 기준의 thickness dataset이 있고 단위는 micrometer입니다. 컬럼은 lot, waferId, chamber, recipe, depositionTimeMin, waferPosition, radiusMm, thicknessMicrometer입니다.
+
 작업: 1) 전체 평균/범위/Spec 이탈을 요약하고 2) wafer edge-high 3) wafer center-edge uniformity 4) 증착 시간에 따른 위치별 박막 성장 패턴을 시각화하세요.
+
 시각화: Excel 기본 차트로 보기 어려운 wafer cross-section film growth, wafer position heatmap, time-resolved thickness heatmap, distribution curve, box plot, fishbone diagram, Pareto chart를 포함하세요.
+
 결과: 강의용 React 대시보드와 3페이지 발표자료를 만드세요. 발표자료는 가상 반도체 프로젝트 목표, 시간별 edge-high uniformity 변화, film stress/wafer bow 원인 분석과 개선 일정을 포함해야 합니다.`;
 
 function CvdAnimation() {
@@ -882,11 +891,7 @@ export default function App() {
         </div>
 
         <motion.div className="hero-section" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
-          <span className="hero-kicker">Lecture 03 · MES Dashboard Automation</span>
-          <h1>
-            바이브 코딩 3강:<br />
-            <mark>엑셀 노가다 탈출</mark>과 CVD 공정 데이터 대시보드
-          </h1>
+          <h1>Ch.3 CVD 공정 데이터를 AI 대시보드로 바꾸는 첫걸음</h1>
           <p className="subtitle">
             <Term note="생산 현장의 공정 실행 데이터를 시간순으로 남기는 시스템입니다.">MES</Term> 공정관리 데이터를 읽고,
             CVD 증착 두께 데이터셋을 만든 뒤, Antigravity로 요약·분석·고급 시각화 대시보드를 완성하는 전 과정을 단계적으로 설명합니다.
@@ -986,7 +991,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">05. 엑셀 노가다</span>
+        <span className="section-label">05. 엑셀 수작업</span>
         <h2><FileSpreadsheet size={24} /> 같은 데이터를 엑셀로만 보면 <mark>패턴을 놓치기 쉽습니다</mark></h2>
         <div className="case-grid">
           <div className="work-card manual">
@@ -1118,14 +1123,14 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">08. 바이브 코딩 지시문</span>
+        <span className="section-label">08. 바이브 코딩 프롬프트</span>
         <h2><Sparkles size={24} /> 데이터셋을 <mark>대시보드 요구사항</mark>으로 바꿉니다</h2>
         <p className="section-intro">
-          좋은 지시문은 한 번에 완벽한 문장이 아니라, “초안 생성 → 공정 의미 보강 → 고급 시각화 추가 → 검증”으로 이어지는 작업 흐름입니다.
-          아래 예시는 Antigravity Agent에게 순서대로 넣을 수 있는 실전 지시문입니다.
+          좋은 프롬프트는 한 번에 완벽한 문장이 아니라, “초안 생성 → 공정 의미 보강 → 고급 시각화 추가 → 검증”으로 이어지는 작업 흐름입니다.
+          아래 예시는 수강생이 사용하는 IDE의 AI 도구에 순서대로 넣을 수 있는 실전 프롬프트입니다.
         </p>
         <div className="prompt-card engineering wide">
-          <span>Antigravity Agent Prompt</span>
+          <span>프롬프트</span>
           <div className="prompt-box">{promptText}</div>
         </div>
         <div className="prompt-ladder">
@@ -1140,7 +1145,7 @@ export default function App() {
           ))}
         </div>
         <div className="prompt-checklist">
-          <h3>지시문 품질 체크리스트</h3>
+          <h3>프롬프트 품질 체크리스트</h3>
           {promptChecklist.map((item) => (
             <div className="check-row" key={item}>
               <Sparkles size={16} />

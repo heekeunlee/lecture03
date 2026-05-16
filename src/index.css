@@ -37,28 +37,36 @@ body {
 
 .header-top {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
   margin-bottom: 4rem;
 }
 
+.logo-group {
+  display: flex;
+  align-items: center;
+}
+
 .header-logo {
-  width: auto;
   height: 28px;
+  width: auto;
+  opacity: 0.9;
 }
 
 .header-tag-container {
-  display: flex;
   flex: 1;
+  display: flex;
   justify-content: flex-end;
 }
 
 .header-tag {
   max-width: 360px;
   color: var(--text-primary);
+  font-family: var(--font-main);
   font-size: 1.1rem;
   font-weight: 800;
+  letter-spacing: 0;
   text-align: right;
 }
 
