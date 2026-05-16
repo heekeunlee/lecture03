@@ -891,7 +891,7 @@ export default function App() {
         </div>
 
         <motion.div className="hero-section" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
-          <h1>Ch.3 CVD 공정 데이터를 AI 대시보드로 바꾸는 첫걸음</h1>
+          <h1>Ch.3 CVD 공정 데이터를 AI 대시보드로 바꾸기</h1>
           <p className="subtitle">
             <Term note="생산 현장의 공정 실행 데이터를 시간순으로 남기는 시스템입니다.">MES</Term> 공정관리 데이터를 읽고,
             CVD 증착 두께 데이터셋을 만든 뒤, Antigravity로 요약·분석·고급 시각화 대시보드를 완성하는 전 과정을 단계적으로 설명합니다.
