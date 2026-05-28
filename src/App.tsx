@@ -16,14 +16,18 @@ import {
   LineChart,
   Monitor,
   MousePointer2,
-  PackageCheck,
   PlayCircle,
   ScanLine,
   Search,
   Sparkles,
-  TerminalSquare,
   TimerReset,
   Wand2,
+  Settings,
+  FolderOpen,
+  Folder,
+  Play,
+  X,
+  User,
 } from 'lucide-react';
 
 type TermProps = {
@@ -158,15 +162,15 @@ const ideCards = [
 ];
 
 const antigravitySteps = [
-  { target: 'download', title: '설치 파일 받기', body: '공식 배포 페이지에서 운영체제에 맞는 설치 파일을 내려받고 실행합니다. 회사 PC라면 보안 정책상 설치 권한, 프록시, GitHub 접속 가능 여부를 먼저 확인합니다.', x: 18, y: 18 },
-  { target: 'account', title: '로그인과 기본 설정', body: '계정 로그인 후 모델, 테마, 터미널 기본 shell, Git 연동 상태를 확인합니다. 강의에서는 “AI가 파일을 수정하고 실행 결과를 확인하는 흐름”을 보여주기 위해 Agent 권한을 사용합니다.', x: 82, y: 16 },
-  { target: 'explorer', title: '프로젝트 폴더 열기', body: '좌측 Explorer에서 lecture03 폴더를 열어 src, public, package.json 구조를 확인합니다. 수강생에게 “App.tsx는 화면, index.css는 디자인, package.json은 실행 명령”이라고 설명합니다.', x: 14, y: 44 },
-  { target: 'context', title: '데이터와 요구사항 붙이기', body: 'CVD 두께 데이터 컬럼, spec 기준, MES 용어 설명을 Agent에게 먼저 제공합니다. 이 단계가 빠지면 AI는 일반적인 차트만 만들고 공정 의미를 놓칩니다.', x: 66, y: 38 },
-  { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 말하되, 결과물 형식과 검증 조건까지 함께 적습니다.', x: 78, y: 26 },
-  { target: 'plan', title: '계획 확인 후 승인', body: 'AI가 제안한 작업 계획에서 데이터 생성, 요약 지표, 시각화, 반응형 화면, 빌드 검증이 포함됐는지 확인합니다. 빠진 항목은 구현 전에 바로 추가 지시합니다.', x: 79, y: 48 },
-  { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다. 오류 메시지는 요약하지 말고 원문 그대로 붙이는 편이 좋습니다.', x: 46, y: 84 },
-  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명, 모바일 폭을 확인합니다. “보기 좋게”보다 “Edge 과두께가 더 선명하게 보이게”처럼 구체적으로 말합니다.', x: 55, y: 48 },
-  { target: 'commit', title: '커밋과 배포', body: '완성 후 git status로 변경 파일을 확인하고, 커밋 메시지를 작성한 뒤 GitHub Pages에 배포합니다. 강의에서는 결과 URL을 열어 수강생에게 완성물을 보여줍니다.', x: 44, y: 16 },
+  { target: 'download', title: '설치 파일 받기', body: '공식 배포 페이지에서 운영체제에 맞는 설치 파일을 내려받고 실행합니다. 회사 PC라면 보안 정책상 설치 권한, 프록시, GitHub 접속 가능 여부를 먼저 확인합니다.', x: 8, y: 3 },
+  { target: 'account', title: '로그인과 기본 설정', body: '계정 로그인 후 모델, 테마, 터미널 기본 shell, Git 연동 상태를 확인합니다. 강의에서는 “AI가 파일을 수정하고 실행 결과를 확인하는 흐름”을 보여주기 위해 Agent 권한을 사용합니다.', x: 2, y: 94 },
+  { target: 'explorer', title: '프로젝트 폴더 열기', body: '좌측 Explorer에서 lecture03 폴더를 열어 src, public, package.json 구조를 확인합니다. 수강생에게 “App.tsx는 화면, index.css는 디자인, package.json은 실행 명령”이라고 설명합니다.', x: 14, y: 15 },
+  { target: 'context', title: '데이터와 요구사항 붙이기', body: 'CVD 두께 데이터 컬럼, spec 기준, MES 용어 설명을 Agent에게 먼저 제공합니다. 이 단계가 빠지면 AI는 일반적인 차트만 만들고 공정 의미를 놓칩니다.', x: 88, y: 22 },
+  { target: 'chat', title: 'Agent에게 목표 말하기', body: '오른쪽 채팅/Agent 패널에 “CVD 두께 데이터를 분석하는 대시보드 웹앱을 만들어줘”라고 말하되, 결과물 형식과 검증 조건까지 함께 적습니다.', x: 88, y: 84 },
+  { target: 'plan', title: '계획 확인 후 승인', body: 'AI가 제안한 작업 계획에서 데이터 생성, 요약 지표, 시각화, 반응형 화면, 빌드 검증이 포함됐는지 확인합니다. 빠진 항목은 구현 전에 바로 추가 지시합니다.', x: 88, y: 55 },
+  { target: 'terminal', title: '실행과 검증', body: '터미널에서 npm install, npm run dev, npm run build를 실행하고 오류를 AI에게 다시 전달합니다. 오류 메시지는 요약하지 말고 원문 그대로 붙이는 편이 좋습니다.', x: 45, y: 84 },
+  { target: 'preview', title: '화면 확인 후 수정 지시', body: '미리보기 화면에서 글자 겹침, 차트 의미, 공정 용어 설명, 모바일 폭을 확인합니다. “보기 좋게”보다 “Edge 과두께가 더 선명하게 보이게”처럼 구체적으로 말합니다.', x: 45, y: 35 },
+  { target: 'commit', title: '커밋과 배포', body: '완성 후 git status로 변경 파일을 확인하고, 커밋 메시지를 작성한 뒤 GitHub Pages에 배포합니다. 강의에서는 결과 URL을 열어 수강생에게 완성물을 보여줍니다.', x: 2, y: 22 },
 ];
 
 const ideDecisionRows = [
@@ -1061,28 +1065,150 @@ export default function App() {
           이번 강의는 Antigravity를 기준으로 진행합니다. 핵심은 “데이터와 목표를 설명하고, AI가 파일을 만들고, 내가 화면을 보고 다시 지시하는” 반복입니다.
         </p>
         <div className="tutorial-board">
-          <div className="mock-ide">
-            <aside>
-              <b>Explorer</b>
-              <span>lecture03</span>
-              <span>src/App.tsx</span>
-              <span>src/index.css</span>
-              <span>package.json</span>
-            </aside>
-            <main>
-              <div className="tabs"><span>App.tsx</span><span>Preview</span><span>Dashboard</span></div>
-              <div className="preview-box">
-                <PackageCheck size={34} />
-                <strong>CVD Thickness Dashboard</strong>
-                <p>MES data summary · spec timeline · anomaly ribbon</p>
+          <div className="mock-ide-window">
+            <div className="window-headerbar">
+              <div className="mac-dots">
+                <span className="dot red" />
+                <span className="dot yellow" />
+                <span className="dot green" />
               </div>
-              <div className="terminal"><TerminalSquare size={16} /> npm run dev</div>
-            </main>
-            <div className="agent-panel">
-              <b>Agent</b>
-              <p>데이터셋을 읽고 CVD 두께 대시보드를 만들어줘.</p>
-              <button><Wand2 size={15} /> Run</button>
+              <div className="window-title">lecture03 - Antigravity IDE</div>
+              <div className="window-actions" />
             </div>
+            
+            <div className="mock-ide">
+              <div className="activity-bar">
+                <div className="activity-top">
+                  <div className="activity-icon active"><FolderOpen size={18} /></div>
+                  <div className="activity-icon"><Search size={18} /></div>
+                  <div className="activity-icon"><GitBranch size={18} /></div>
+                  <div className="activity-icon"><Boxes size={18} /></div>
+                  <div className="activity-icon"><Bot size={18} color="#38bdf8" /></div>
+                </div>
+                <div className="activity-bottom">
+                  <div className="activity-icon"><Settings size={18} /></div>
+                </div>
+              </div>
+              
+              <aside className="explorer-sidebar">
+                <div className="sidebar-title">
+                  <span>EXPLORER</span>
+                </div>
+                <div className="sidebar-section">
+                  <div className="section-title"><FolderOpen size={12} /> <strong>lecture03</strong></div>
+                  <div className="tree-items">
+                    <div className="tree-item"><FolderOpen size={12} /> <span>src</span></div>
+                    <div className="tree-items nested">
+                      <div className="tree-item active"><Code2 size={12} color="#38bdf8" /> <span>App.tsx</span></div>
+                      <div className="tree-item"><Code2 size={12} color="#8b5cf6" /> <span>main.tsx</span></div>
+                      <div className="tree-item"><FileSpreadsheet size={12} color="#f43f5e" /> <span>index.css</span></div>
+                    </div>
+                    <div className="tree-item"><Folder size={12} /> <span>public</span></div>
+                    <div className="tree-item"><Database size={12} color="#eab308" /> <span>package.json</span></div>
+                    <div className="tree-item"><Database size={12} color="#eab308" /> <span>vite.config.ts</span></div>
+                  </div>
+                </div>
+              </aside>
+              
+              <main className="editor-pane">
+                <div className="tabs-bar">
+                  <div className="tab active"><Code2 size={12} color="#38bdf8" /> App.tsx <X size={10} className="close-tab" /></div>
+                  <div className="tab"><FileSpreadsheet size={12} color="#f43f5e" /> index.css</div>
+                  <div className="tab"><Database size={12} color="#eab308" /> package.json</div>
+                </div>
+                <div className="editor-breadcrumbs">
+                  <span>lecture03</span> &gt; <span>src</span> &gt; <span>App.tsx</span>
+                </div>
+                <div className="code-editor">
+                  <div className="line-numbers">
+                    {Array.from({ length: 12 }).map((_, i) => <span key={i}>{i+1}</span>)}
+                  </div>
+                  <pre className="code-content">
+                    <code>
+                      <span className="keyword">import</span> {'{ useState }'} <span className="keyword">from</span> <span className="string">'react'</span>;<br />
+                      <span className="keyword">import</span> {'{ LineChart }'} <span className="keyword">from</span> <span className="string">'lucide-react'</span>;<br />
+                      <br />
+                      <span className="keyword">const</span> <span className="function">CVDDashboard</span> = () =&gt; {'{'}<br />
+                      &nbsp;&nbsp;<span className="keyword">const</span> [data, setData] = <span className="function">useState</span>([]);<br />
+                      &nbsp;&nbsp;<span className="keyword">const</span> specLimit = {'{ LSL: 2.35, USL: 2.75 }'};<br />
+                      <br />
+                      &nbsp;&nbsp;<span className="comment">// AI-generated logic</span><br />
+                      &nbsp;&nbsp;<span className="keyword">const</span> uniformity = <span className="function">calculateUniformity</span>(data);<br />
+                      &nbsp;&nbsp;<span className="keyword">const</span> isOutSpec = data.some(d =&gt; d.thickness &gt; specLimit.USL);<br />
+                      <br />
+                      &nbsp;&nbsp;<span className="keyword">return</span> (<br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span className="tag">div</span> className="dashboard-container"&gt;
+                    </code>
+                  </pre>
+                </div>
+                
+                <div className="terminal-panel">
+                  <div className="terminal-tabs">
+                    <span className="active">TERMINAL</span>
+                    <span>PROBLEMS</span>
+                    <span>OUTPUT</span>
+                    <span>DEBUG CONSOLE</span>
+                  </div>
+                  <div className="terminal-content">
+                    <div className="cmd-line">dasepa@macbook-pro lecture03 % npm run dev</div>
+                    <div className="log-line text-green">➜  Local:   http://localhost:5173/</div>
+                    <div className="log-line text-dim">➜  Vite v8.0.10 ready in 211ms</div>
+                  </div>
+                </div>
+              </main>
+              
+              <div className="agent-sidebar">
+                <div className="agent-header">
+                  <Bot size={14} color="#38bdf8" />
+                  <span>Antigravity Agent</span>
+                  <span className="agent-badge">Active</span>
+                </div>
+                
+                <div className="agent-chat-history">
+                  <div className="chat-msg user">
+                    <div className="avatar"><User size={10} /></div>
+                    <div className="bubble">
+                      <p>CVD 두께 데이터 120개를 생성하고, 수율 및 균일도를 시각화하는 React 대시보드를 만들어줘.</p>
+                    </div>
+                  </div>
+                  <div className="chat-msg agent">
+                    <div className="avatar"><Bot size={10} color="#38bdf8" /></div>
+                    <div className="bubble">
+                      <p>CVD 분석 대시보드를 생성하기 위해 다음 계획을 실행합니다:</p>
+                      <ul>
+                        <li>1. App.tsx에 가상 데이터셋 120개 정의</li>
+                        <li>2. 위치별 히트맵 및 통계 분포 차트 구현</li>
+                        <li>3. 빌드 오류 검증 및 스타일 최적화</li>
+                      </ul>
+                      <div className="plan-approval">
+                        <span>계획 승인 요청</span>
+                        <button className="approve-btn"><Play size={8} fill="currentColor" /> Approve Plan</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="agent-input-container">
+                  <input type="text" placeholder="Ask Antigravity..." disabled />
+                  <button className="run-btn"><Wand2 size={12} /> Run</button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="ide-status-bar">
+              <div className="status-left">
+                <GitBranch size={12} />
+                <span>main*</span>
+              </div>
+              <div className="status-center">
+                <span>Agent Status: Idle</span>
+              </div>
+              <div className="status-right">
+                <span>TypeScript JSX</span>
+                <span>UTF-8</span>
+              </div>
+            </div>
+            
             {antigravitySteps.map((step, index) => (
               <motion.div
                 className="pointer-callout"
