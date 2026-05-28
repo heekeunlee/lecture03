@@ -906,7 +906,7 @@ export default function App() {
       </header>
 
       <section>
-        <span className="section-label">00. 강의 목표</span>
+        <span className="section-label">01. 오프닝 및 학습목표</span>
         <h2><PlayCircle size={24} /> 엑셀 표 정리에서 <mark>공정 데이터 앱 제작</mark>으로 넘어갑니다</h2>
         <div className="goal-grid">
           {goals.map((goal, index) => (
@@ -919,7 +919,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">01. 50분 운영안</span>
+        <span className="section-label">02. 50분 운영안</span>
         <h2><TimerReset size={24} /> 전 과정을 <mark>작은 단계</mark>로 쪼개서 진행합니다</h2>
         <div className="timeline">
           {lessonFlow.map((item) => (
@@ -935,7 +935,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">02. 용어 주석</span>
+        <span className="section-label">03. 용어 주석</span>
         <h2><Factory size={24} /> MES와 주요 공정 용어를 <mark>먼저 고정</mark>합니다</h2>
         <p className="section-intro">
           화면 안의 물결 밑줄 용어에 마우스를 올리면 설명이 나타납니다. AI에게도 이 수준으로 용어 의미를 알려줘야 엉뚱한 분석을 줄일 수 있습니다.
@@ -951,7 +951,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">03. CVD 공정</span>
+        <span className="section-label">04. CVD 공정</span>
         <h2><Layers3 size={24} /> CVD 증착은 <mark>시간 흐름</mark>에 따라 데이터가 쌓입니다</h2>
         <p className="section-intro">
           <Term note="Chemical Vapor Deposition. 화학 반응으로 표면에 박막을 쌓는 증착 공정입니다.">CVD</Term>는 웨이퍼 투입부터 진공,
@@ -969,7 +969,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">04. 두께 데이터셋</span>
+        <span className="section-label">05. 두께 데이터셋</span>
         <h2><Database size={24} /> 120개 CVD 증착 두께 샘플을 <mark>micrometer 단위</mark>로 만듭니다</h2>
         <p className="section-intro">
           목표 두께는 약 2.50 micrometer, 관리 기준은 2.35-2.75 micrometer로 가정합니다. 데이터는 Lot, Chamber, Zone, Time, Thickness로 구성됩니다.
@@ -991,7 +991,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">05. 엑셀 수작업</span>
+        <span className="section-label">06. 엑셀 수작업</span>
         <h2><FileSpreadsheet size={24} /> 같은 데이터를 엑셀로만 보면 <mark>패턴을 놓치기 쉽습니다</mark></h2>
         <div className="case-grid">
           <div className="work-card manual">
@@ -1014,7 +1014,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">06. AI IDE 선택</span>
+        <span className="section-label">07. AI IDE 선택</span>
         <h2><Monitor size={24} /> 바이브 코딩은 <mark>AI IDE</mark>에서 일이 됩니다</h2>
         <p className="section-intro">
           일반 코드 편집기는 “내가 코드를 알고 직접 고치는 도구”에 가깝습니다. AI IDE는 “현장 문제를 설명하면 코드, 데이터, 화면,
@@ -1055,7 +1055,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">07. Antigravity 사용법</span>
+        <span className="section-label">08. Antigravity 사용법</span>
         <h2><Bot size={24} /> 설치부터 메뉴 사용까지 <mark>화면을 따라갑니다</mark></h2>
         <p className="section-intro">
           이번 강의는 Antigravity를 기준으로 진행합니다. 핵심은 “데이터와 목표를 설명하고, AI가 파일을 만들고, 내가 화면을 보고 다시 지시하는” 반복입니다.
@@ -1123,7 +1123,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">08. 바이브 코딩 프롬프트</span>
+        <span className="section-label">09. 바이브 코딩 프롬프트</span>
         <h2><Sparkles size={24} /> 데이터셋을 <mark>대시보드 요구사항</mark>으로 바꿉니다</h2>
         <p className="section-intro">
           좋은 프롬프트는 한 번에 완벽한 문장이 아니라, “초안 생성 → 공정 의미 보강 → 고급 시각화 추가 → 검증”으로 이어지는 작업 흐름입니다.
@@ -1156,7 +1156,7 @@ export default function App() {
       </section>
 
       <section>
-        <span className="section-label">09. 완성 대시보드</span>
+        <span className="section-label">10. 완성 대시보드</span>
         <h2><BarChart3 size={24} /> Edge 과두께를 좁혀가는 <mark>공정 시각화</mark></h2>
         <p className="section-intro">
           이 섹션은 여러 차트를 한 화면에 좁게 나열하지 않고, 보고서처럼 위에서 아래로 읽으며 “웨이퍼 가장자리 두께가 왜 spec을 벗어났는가”를
