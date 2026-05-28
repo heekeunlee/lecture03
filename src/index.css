@@ -214,11 +214,16 @@ section h2 {
   word-break: keep-all;
 }
 
-.goal-grid,
 .practice-grid,
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -358,10 +363,6 @@ section h2 {
 .term {
   position: relative;
   cursor: help;
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: var(--accent);
-  text-underline-offset: 4px;
 }
 
 .term::after {
@@ -2885,7 +2886,8 @@ footer.philosophy-section p {
   .cause-matrix,
   .normal-problem,
   .slide-body,
-  .slide-columns {
+  .slide-columns,
+  .goal-grid {
     grid-template-columns: 1fr;
   }
 
