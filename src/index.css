@@ -808,6 +808,7 @@ section h2 {
 
 /* High-Fidelity Mock IDE Window Frame */
 .mock-ide-window {
+  position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
